@@ -16,11 +16,11 @@ func (s *SmsService) GetTemplates() *assetfs.AssetFS {
 func (s *SmsService) GetFrontendMenu() *frontend.FrontendMenu {
 	return &frontend.FrontendMenu{
 		Name: "Sms",
-		Url:  "/smsintel",
+		Url:  "/sms",
 		Icon: "files-o",
 	}
 }
 
 func (s *SmsService) SetFrontendHandlers(router *frontend.Router) {
-	router.GET(s, "/smsintel", &IndexHandler{})
+	router.GET(s, "/sms", &IndexHandler{})
 }
