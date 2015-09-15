@@ -1,26 +1,22 @@
 package service
 
 import (
-	"fmt"
-	"sync"
-	"time"
-
+	"github.com/Sirupsen/logrus"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow-sms/resource"
 	r "github.com/kihamo/shadow/resource"
 	"github.com/kihamo/smsintel"
-	"github.com/kihamo/smsintel/procedure"
 )
 
 type SmsService struct {
 	application *shadow.Application
-	client      *smsintel.SmsIntel
-	mutex       sync.RWMutex
-	Info        *procedure.InfoOutput
+
+	SmsClient *smsintel.SmsIntel
+	Logger    *logrus.Entry
 }
 
 func (s *SmsService) GetName() string {
-	return "smsintel"
+	return "sms"
 }
 
 func (s *SmsService) Init(a *shadow.Application) error {
@@ -31,29 +27,14 @@ func (s *SmsService) Init(a *shadow.Application) error {
 		return err
 	}
 
-	s.client = resourceSmsIntel.(*resource.SmsIntel).GetClient()
+	s.SmsClient = resourceSmsIntel.(*resource.SmsIntel).GetClient()
 
-	return nil
-}
-
-func (s *SmsService) Run() error {
-	if s.application.HasResource("tasks") {
-		tasks, _ := s.application.GetResource("tasks")
-		tasks.(*r.Dispatcher).AddNamedTask("aws.updater", s.getInfoJob)
+	resourceLogger, err := a.GetResource("logger")
+	if err != nil {
+		return err
 	}
+	logger := resourceLogger.(*r.Logger)
+	s.Logger = logger.Get(s.GetName())
 
 	return nil
-}
-
-func (s *SmsService) getInfoJob(args ...interface{}) (bool, time.Duration) {
-	var err error
-
-	s.mutex.Lock()
-	s.Info, err = s.client.Info(nil)
-
-	fmt.Println(err, s.Info)
-
-	s.mutex.Unlock()
-
-	return true, time.Hour
 }

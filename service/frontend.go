@@ -15,7 +15,7 @@ func (s *SmsService) GetTemplates() *assetfs.AssetFS {
 
 func (s *SmsService) GetFrontendMenu() *frontend.FrontendMenu {
 	return &frontend.FrontendMenu{
-		Name: "Sms",
+		Name: "SMS",
 		Url:  "/sms",
 		Icon: "files-o",
 	}
