@@ -59,11 +59,11 @@ func (p *SendProcedure) Run(r interface{}) *turnpike.CallResult {
 
 func (p *SendProcedure) jobSend(args ...interface{}) (repeat int64, period time.Duration) {
 	message := args[0].(string)
-	phones := args[1].([]string)
+	phones := strings.Join(args[1].([]string), ",")
 
 	_, err := p.Service.(*SmsService).SmsClient.SendSms(&procedure.SendSmsInput{
 		Txt: message,
-		To:  strings.Join(phones, ","),
+		To:  &phones,
 	})
 
 	if err != nil {
