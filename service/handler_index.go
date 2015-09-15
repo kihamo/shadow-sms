@@ -27,7 +27,7 @@ func (h *IndexHandler) Init(a *shadow.Application, s shadow.Service) {
 	h.AbstractFrontendHandler.Init(a, s)
 }
 
-func (h *IndexHandler) getInfoJob(args ...interface{}) (int64, time.Duration) {
+func (h *IndexHandler) getInfoJob(args ...interface{}) (repeat int64, duration time.Duration) {
 	service := h.Service.(*SmsService)
 	info, err := service.SmsClient.Info(nil)
 
@@ -41,9 +41,13 @@ func (h *IndexHandler) getInfoJob(args ...interface{}) (int64, time.Duration) {
 
 	if h.balanceError != nil {
 		service.Logger.Warn(h.balanceError.Error())
+
+		duration = time.Minute
+	} else {
+		duration = time.Hour
 	}
 
-	return -1, time.Hour
+	return -1, duration
 }
 
 func (h *IndexHandler) Handle() {
