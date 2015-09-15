@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/kihamo/shadow"
+	apis "github.com/kihamo/shadow-api/service"
 	"github.com/kihamo/shadow/resource"
-	"github.com/kihamo/shadow/service/api"
 	"github.com/kihamo/smsintel/procedure"
 	"gopkg.in/jcelliott/turnpike.v2"
 )
@@ -22,7 +22,7 @@ type SendRequest struct {
 }
 
 type SendProcedure struct {
-	api.AbstractApiProcedure
+	apis.AbstractApiProcedure
 
 	tasks *resource.Dispatcher
 }

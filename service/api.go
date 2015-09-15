@@ -1,11 +1,11 @@
 package service
 
 import (
-	"github.com/kihamo/shadow/service/api"
+	apis "github.com/kihamo/shadow-api/service"
 )
 
-func (s *SmsService) GetApiProcedures() []api.ApiProcedure {
-	return []api.ApiProcedure{
+func (s *SmsService) GetApiProcedures() []apis.ApiProcedure {
+	return []apis.ApiProcedure{
 		&SendProcedure{},
 	}
 }
