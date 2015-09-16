@@ -70,5 +70,7 @@ func (p *SendProcedure) jobSend(args ...interface{}) (repeat int64, period time.
 		repeat = SendAttempts
 	}
 
+	// TODO: update balance if success (after 5 minute)
+
 	return repeat, time.Minute * 5
 }
