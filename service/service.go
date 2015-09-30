@@ -75,7 +75,7 @@ func (s *SmsService) getBalanceJob(args ...interface{}) (repeat int64, duration 
 
 	if s.BalanceError != nil {
 		s.Logger.Warn(s.BalanceError.Error())
-		s.FrontendService.SendAlert(fmt.Sprintf("Error get sms balance: %s", s.BalanceError.Error()), "exclamation")
+		s.FrontendService.SendAlert("Error get sms balance", s.BalanceError.Error(), "exclamation")
 
 		duration = time.Minute
 	} else {
