@@ -7,9 +7,10 @@ import (
 
 func (s *SmsService) GetTemplates() *assetfs.AssetFS {
 	return &assetfs.AssetFS{
-		Asset:    Asset,
-		AssetDir: AssetDir,
-		Prefix:   "templates",
+		Asset:     Asset,
+		AssetDir:  AssetDir,
+		AssetInfo: AssetInfo,
+		Prefix:    "templates",
 	}
 }
 
