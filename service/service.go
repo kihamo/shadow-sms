@@ -61,7 +61,7 @@ func (s *SmsService) Run() error {
 	return nil
 }
 
-func (s *SmsService) getBalanceJob(args ...interface{}) (repeat int64, duration time.Duration) {
+func (s *SmsService) getBalanceJob(attempts int64, args ...interface{}) (repeat int64, duration time.Duration) {
 	info, err := s.SmsClient.Info(nil)
 
 	s.mutex.Lock()
