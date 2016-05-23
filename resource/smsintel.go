@@ -4,6 +4,7 @@ import (
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/resource"
 	"github.com/kihamo/smsintel"
+	"github.com/kihamo/smsintel/procedure"
 )
 
 type SmsIntel struct {
@@ -49,4 +50,14 @@ func (r *SmsIntel) GetClient() *smsintel.SmsIntel {
 	}
 
 	return r.client
+}
+
+func (r *SmsIntel) Send(message, phone string) error {
+	input := &procedure.SendSmsInput{
+		Txt: message,
+		To:  &phone,
+	}
+
+	_, err := r.GetClient().SendSms(input)
+	return err
 }

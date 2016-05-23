@@ -19,9 +19,22 @@ func (s *SmsService) GetFrontendMenu() *frontend.FrontendMenu {
 		Name: "SMS",
 		Url:  "/sms",
 		Icon: "files-o",
+		SubMenu: []*frontend.FrontendMenu{{
+			Name: "Balance",
+			Url:  "/sms",
+			Icon: "send",
+		}, {
+			Name: "Send",
+			Url:  "/sms/send",
+			Icon: "send",
+		}},
 	}
 }
 
 func (s *SmsService) SetFrontendHandlers(router *frontend.Router) {
 	router.GET(s, "/sms", &IndexHandler{})
+
+	handlerSend := &SendHandler{}
+	router.GET(s, "/sms/send", handlerSend)
+	router.POST(s, "/sms/send", handlerSend)
 }
