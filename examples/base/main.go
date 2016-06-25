@@ -8,6 +8,7 @@ import (
 	smss "github.com/kihamo/shadow-sms/service"
 	"github.com/kihamo/shadow/resource"
 	"github.com/kihamo/shadow/service/frontend"
+	"github.com/kihamo/shadow/service/system"
 )
 
 func main() {
@@ -16,11 +17,12 @@ func main() {
 			new(resource.Config),
 			new(resource.Logger),
 			new(resource.Template),
-			new(resource.Dispatcher),
+			new(resource.Workers),
 			new(smsr.SmsIntel),
 		},
 		[]shadow.Service{
 			new(frontend.FrontendService),
+			new(system.SystemService),
 			new(smss.SmsService),
 		},
 		"Sms",

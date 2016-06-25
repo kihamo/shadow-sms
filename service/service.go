@@ -53,15 +53,15 @@ func (s *SmsService) Init(a *shadow.Application) error {
 }
 
 func (s *SmsService) Run() error {
-	if s.application.HasResource("tasks") {
-		tasks, _ := s.application.GetResource("tasks")
-		tasks.(*r.Dispatcher).AddNamedTask("sms.balance.updater", s.getBalanceJob)
+	if s.application.HasResource("workers") {
+		tasks, _ := s.application.GetResource("workers")
+		tasks.(*r.Workers).GetDispatcher().AddNamedTaskByFunc("sms.balance.updater", s.getBalanceJob)
 	}
 
 	return nil
 }
 
-func (s *SmsService) getBalanceJob(attempts int64, args ...interface{}) (repeat int64, duration time.Duration) {
+func (s *SmsService) getBalanceJob(attempts int64, _ chan bool, args ...interface{}) (repeat int64, duration time.Duration) {
 	info, err := s.SmsClient.Info(nil)
 
 	s.mutex.Lock()
