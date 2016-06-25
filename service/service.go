@@ -54,8 +54,8 @@ func (s *SmsService) Init(a *shadow.Application) error {
 
 func (s *SmsService) Run() error {
 	if s.application.HasResource("workers") {
-		tasks, _ := s.application.GetResource("workers")
-		tasks.(*r.Workers).GetDispatcher().AddNamedTaskByFunc("sms.balance.updater", s.getBalanceJob)
+		workers, _ := s.application.GetResource("workers")
+		workers.(*r.Workers).GetDispatcher().AddNamedTaskByFunc("sms.balance.updater", s.getBalanceJob)
 	}
 
 	return nil
