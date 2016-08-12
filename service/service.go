@@ -61,7 +61,7 @@ func (s *SmsService) Run() error {
 	return nil
 }
 
-func (s *SmsService) getBalanceJob(attempts int64, _ chan bool, args ...interface{}) (int64, time.Duration, error) {
+func (s *SmsService) getBalanceJob(attempts int64, _ chan bool, args ...interface{}) (int64, time.Duration, interface{}, error) {
 	info, err := s.SmsClient.Info(nil)
 
 	s.mutex.Lock()
@@ -74,8 +74,8 @@ func (s *SmsService) getBalanceJob(attempts int64, _ chan bool, args ...interfac
 
 	if err != nil {
 		s.FrontendService.SendAlert("Error get sms balance", err.Error(), "exclamation")
-		return -1, time.Minute, err
+		return -1, time.Minute, nil, err
 	}
 
-	return -1, time.Hour, nil
+	return -1, time.Hour, nil, nil
 }
