@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/resource"
 	"github.com/kihamo/smsintel"
@@ -10,6 +11,7 @@ import (
 type SmsIntel struct {
 	application *shadow.Application
 	config      *resource.Config
+	logger      *logrus.Entry
 	client      *smsintel.SmsIntel
 }
 
@@ -41,6 +43,13 @@ func (r *SmsIntel) Init(a *shadow.Application) error {
 
 	r.config = resourceConfig.(*resource.Config)
 
+	resourceLogger, err := r.application.GetResource("logger")
+	if err != nil {
+		return err
+	}
+
+	r.logger = resourceLogger.(*resource.Logger).Get(r.GetName())
+
 	return nil
 }
 
@@ -59,5 +68,17 @@ func (r *SmsIntel) Send(message, phone string) error {
 	}
 
 	_, err := r.GetClient().SendSms(input)
+
+	entry := r.logger.WithFields(logrus.Fields{
+		"phone":   phone,
+		"message": message,
+	})
+
+	if err == nil {
+		entry.Info("Send success")
+	} else {
+		entry.Error("Send failed")
+	}
+
 	return err
 }
