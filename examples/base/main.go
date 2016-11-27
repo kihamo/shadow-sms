@@ -19,7 +19,7 @@ func main() {
 			new(resource.Logger),
 			new(resource.Template),
 			new(resource.Workers),
-			new(alerts.Alert),
+			new(alerts.Alerts),
 			new(r.SmsIntel),
 		},
 		[]shadow.Service{

@@ -77,7 +77,7 @@ func (r *SmsIntel) Send(message, phone string) error {
 	if err == nil {
 		entry.Info("Send success")
 	} else {
-		entry.Error("Send failed")
+		entry.WithField("error", err.Error()).Error("Send failed")
 	}
 
 	return err
