@@ -10,7 +10,6 @@ import (
 	r "github.com/kihamo/shadow/resource"
 	"github.com/kihamo/shadow/resource/alerts"
 	"github.com/kihamo/shadow/service/frontend"
-	"github.com/kihamo/smsintel"
 )
 
 type SmsService struct {
@@ -18,7 +17,7 @@ type SmsService struct {
 	mutex       sync.RWMutex
 
 	FrontendService *frontend.FrontendService
-	SmsClient       *smsintel.SmsIntel
+	Sms             *resource.SmsIntel
 	Logger          *logrus.Entry
 	BalanceValue    float64
 	BalanceError    error
@@ -41,7 +40,7 @@ func (s *SmsService) Init(a *shadow.Application) error {
 	if err != nil {
 		return err
 	}
-	s.SmsClient = resourceSmsIntel.(*resource.SmsIntel).GetClient()
+	s.Sms = resourceSmsIntel.(*resource.SmsIntel)
 
 	resourceLogger, err := a.GetResource("logger")
 	if err != nil {
@@ -63,7 +62,7 @@ func (s *SmsService) Run() error {
 }
 
 func (s *SmsService) getBalanceJob(attempts int64, _ chan bool, args ...interface{}) (int64, time.Duration, interface{}, error) {
-	info, err := s.SmsClient.Info(nil)
+	info, err := s.Sms.GetClient().Info(nil)
 
 	s.mutex.Lock()
 	s.BalanceError = err
