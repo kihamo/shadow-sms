@@ -8,6 +8,7 @@ import (
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow-sms/resource"
 	r "github.com/kihamo/shadow/resource"
+	"github.com/kihamo/shadow/resource/alerts"
 	"github.com/kihamo/shadow/service/frontend"
 	"github.com/kihamo/smsintel"
 )
@@ -72,8 +73,10 @@ func (s *SmsService) getBalanceJob(attempts int64, _ chan bool, args ...interfac
 	}
 	s.mutex.Unlock()
 
-	if err != nil {
-		s.FrontendService.SendAlert("Error get sms balance", err.Error(), "exclamation")
+	if err != nil && s.application.HasResource("alerts") {
+		resourceAlerts, _ := s.application.GetResource("alerts")
+		resourceAlerts.(*alerts.Alerts).Send("Error get sms balance", err.Error(), "exclamation")
+
 		return -1, time.Minute, nil, err
 	}
 
