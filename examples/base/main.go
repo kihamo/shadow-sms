@@ -4,10 +4,12 @@ import (
 	"log"
 
 	"github.com/kihamo/shadow"
-	r "github.com/kihamo/shadow-sms/resource"
+	"github.com/kihamo/shadow-sms/resource/smsintel"
 	s "github.com/kihamo/shadow-sms/service"
 	"github.com/kihamo/shadow/resource"
 	"github.com/kihamo/shadow/resource/alerts"
+	"github.com/kihamo/shadow/resource/metrics"
+	"github.com/kihamo/shadow/resource/workers"
 	"github.com/kihamo/shadow/service/frontend"
 	"github.com/kihamo/shadow/service/system"
 )
@@ -18,9 +20,10 @@ func main() {
 			new(resource.Config),
 			new(resource.Logger),
 			new(resource.Template),
-			new(resource.Workers),
 			new(alerts.Alerts),
-			new(r.SmsIntel),
+			new(metrics.Metrics),
+			new(workers.Workers),
+			new(smsintel.SmsIntel),
 		},
 		[]shadow.Service{
 			new(frontend.FrontendService),

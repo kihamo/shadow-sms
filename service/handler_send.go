@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/kihamo/shadow-sms/resource"
+	"github.com/kihamo/shadow-sms/resource/smsintel"
 	"github.com/kihamo/shadow/service/frontend"
 )
 
@@ -15,7 +15,7 @@ func (h *SendHandler) Handle() {
 		message := h.Input.FormValue("message")
 
 		resourceSms, _ := h.Application.GetResource("smsintel")
-		if err := resourceSms.(*resource.SmsIntel).Send(message, phone); err != nil {
+		if err := resourceSms.(*smsintel.SmsIntel).Send(message, phone); err != nil {
 			h.SendJSON(map[string]interface{}{
 				"error": err.Error(),
 			})

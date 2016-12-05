@@ -1,18 +1,20 @@
-package resource
+package smsintel
 
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/resource"
+	"github.com/kihamo/shadow/resource/metrics"
 	"github.com/kihamo/smsintel"
 	"github.com/kihamo/smsintel/procedure"
 )
 
 type SmsIntel struct {
 	application *shadow.Application
+	client      *smsintel.SmsIntel
 	config      *resource.Config
 	logger      *logrus.Entry
-	client      *smsintel.SmsIntel
+	metrics     *metrics.Metrics
 }
 
 func (r *SmsIntel) GetName() string {
@@ -47,8 +49,12 @@ func (r *SmsIntel) Init(a *shadow.Application) error {
 	if err != nil {
 		return err
 	}
-
 	r.logger = resourceLogger.(*resource.Logger).Get(r.GetName())
+
+	if a.HasResource("metrics") {
+		resourceMetrics, _ := a.GetResource("metrics")
+		r.metrics = resourceMetrics.(*metrics.Metrics)
+	}
 
 	return nil
 }
@@ -76,9 +82,31 @@ func (r *SmsIntel) Send(message, phone string) error {
 
 	if err == nil {
 		entry.Info("Send success")
+
+		if r.metrics != nil {
+			r.metrics.NewCounter(MetricSmsTotalSendSuccess).Inc(1)
+		}
 	} else {
 		entry.WithField("error", err.Error()).Error("Send failed")
+
+		if r.metrics != nil {
+			r.metrics.NewCounter(MetricSmsTotalSendFailed).Inc(1)
+		}
 	}
 
 	return err
+}
+
+func (r *SmsIntel) GetBalance() (float64, error) {
+	info, err := r.GetClient().Info(nil)
+
+	if err != nil {
+		return -1, err
+	}
+
+	if r.metrics != nil {
+		r.metrics.NewGaugeFloat64(MetricSmsBalance).Update(info.Account)
+	}
+
+	return info.Account, nil
 }

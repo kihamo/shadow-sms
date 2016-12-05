@@ -85,7 +85,7 @@ func templatesIndexTplHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/index.tpl.html", size: 845, mode: os.FileMode(420), modTime: time.Unix(1442427121, 0)}
+	info := bindataFileInfo{name: "templates/index.tpl.html", size: 845, mode: os.FileMode(420), modTime: time.Unix(1480281896, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -105,7 +105,7 @@ func templatesSendTplHtml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "templates/send.tpl.html", size: 2224, mode: os.FileMode(420), modTime: time.Unix(1464033739, 0)}
+	info := bindataFileInfo{name: "templates/send.tpl.html", size: 2224, mode: os.FileMode(420), modTime: time.Unix(1480281896, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
