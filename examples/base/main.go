@@ -5,10 +5,12 @@ import (
 
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow-sms/resource/smsintel"
-	s "github.com/kihamo/shadow-sms/service"
-	"github.com/kihamo/shadow/resource"
+	"github.com/kihamo/shadow-sms/service"
 	"github.com/kihamo/shadow/resource/alerts"
+	"github.com/kihamo/shadow/resource/config"
+	"github.com/kihamo/shadow/resource/logger"
 	"github.com/kihamo/shadow/resource/metrics"
+	"github.com/kihamo/shadow/resource/template"
 	"github.com/kihamo/shadow/resource/workers"
 	"github.com/kihamo/shadow/service/frontend"
 	"github.com/kihamo/shadow/service/system"
@@ -17,18 +19,18 @@ import (
 func main() {
 	application, err := shadow.NewApplication(
 		[]shadow.Resource{
-			new(resource.Config),
-			new(resource.Logger),
-			new(resource.Template),
-			new(alerts.Alerts),
-			new(metrics.Metrics),
-			new(workers.Workers),
-			new(smsintel.SmsIntel),
+			new(config.Resource),
+			new(metrics.Resource),
+			new(logger.Resource),
+			new(template.Resource),
+			new(alerts.Resource),
+			new(workers.Resource),
+			new(smsintel.Resource),
 		},
 		[]shadow.Service{
 			new(frontend.FrontendService),
 			new(system.SystemService),
-			new(s.SmsService),
+			new(service.SmsService),
 		},
 		"Sms",
 		"1.0",

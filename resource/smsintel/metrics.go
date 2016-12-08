@@ -1,7 +1,6 @@
 package smsintel
 
 const (
-	MetricSmsBalance          = "sms.balance"
-	MetricSmsTotalSendSuccess = "sms.total_send.success"
-	MetricSmsTotalSendFailed  = "sms.total_send.failed"
+	MetricSmsBalance   = "sms.balance"
+	MetricSmsTotalSend = "sms.total_send"
 )

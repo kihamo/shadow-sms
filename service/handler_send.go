@@ -15,7 +15,7 @@ func (h *SendHandler) Handle() {
 		message := h.Input.FormValue("message")
 
 		resourceSms, _ := h.Application.GetResource("smsintel")
-		if err := resourceSms.(*smsintel.SmsIntel).Send(message, phone); err != nil {
+		if err := resourceSms.(*smsintel.Resource).Send(message, phone); err != nil {
 			h.SendJSON(map[string]interface{}{
 				"error": err.Error(),
 			})
