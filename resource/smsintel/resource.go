@@ -6,14 +6,13 @@ import (
 	"github.com/kihamo/shadow/resource/logger"
 	"github.com/kihamo/smsintel"
 	"github.com/kihamo/smsintel/procedure"
-	"github.com/rs/xlog"
 )
 
 type Resource struct {
 	application *shadow.Application
 	config      *config.Resource
 	client      *smsintel.SmsIntel
-	logger      xlog.Logger
+	logger      logger.Logger
 }
 
 func (r *Resource) GetName() string {
@@ -36,7 +35,7 @@ func (r *Resource) Run() error {
 	if resourceLogger, err := r.application.GetResource("logger"); err == nil {
 		r.logger = resourceLogger.(*logger.Resource).Get(r.GetName())
 	} else {
-		r.logger = xlog.NopLogger
+		r.logger = logger.NopLogger
 	}
 
 	return nil
@@ -59,7 +58,7 @@ func (r *Resource) Send(message, phone string) error {
 	_, err := r.GetClient().SendSms(input)
 
 	if err == nil {
-		r.logger.Info("Send success", xlog.F{
+		r.logger.Info("Send success", map[string]interface{}{
 			"phone": phone,
 			"text":  message,
 		})
@@ -68,7 +67,7 @@ func (r *Resource) Send(message, phone string) error {
 			metricTotalSendSuccess.Add(1)
 		}
 	} else {
-		r.logger.Error("Send failed", xlog.F{
+		r.logger.Error("Send failed", map[string]interface{}{
 			"phone": phone,
 			"text":  message,
 			"error": err.Error(),
