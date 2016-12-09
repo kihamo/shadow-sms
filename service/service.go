@@ -7,15 +7,12 @@ import (
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow-sms/resource/smsintel"
 	"github.com/kihamo/shadow/resource/alerts"
-	"github.com/kihamo/shadow/resource/logger"
 	"github.com/kihamo/shadow/resource/workers"
-	"github.com/rs/xlog"
 )
 
 type SmsService struct {
 	application *shadow.Application
 	sms         *smsintel.Resource
-	logger      xlog.Logger
 
 	mutex sync.RWMutex
 
@@ -35,12 +32,6 @@ func (s *SmsService) Init(a *shadow.Application) error {
 		return err
 	}
 	s.sms = resourceSmsIntel.(*smsintel.Resource)
-
-	resourceLogger, err := a.GetResource("logger")
-	if err != nil {
-		return err
-	}
-	s.logger = resourceLogger.(*logger.Resource).Get(s.GetName())
 
 	return nil
 }

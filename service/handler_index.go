@@ -15,7 +15,9 @@ func (h *IndexHandler) Handle() {
 
 	service := h.Service.(*SmsService)
 
+	service.mutex.RLock()
 	h.SetVar("BalanceError", service.balanceError)
 	h.SetVar("BalanceValue", service.balanceValue)
 	h.SetVar("BalancePositive", service.balanceValue > 0)
+	service.mutex.RUnlock()
 }
