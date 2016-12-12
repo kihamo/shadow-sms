@@ -32,9 +32,13 @@ func (s *SmsService) GetFrontendMenu() *frontend.FrontendMenu {
 }
 
 func (s *SmsService) SetFrontendHandlers(router *frontend.Router) {
-	router.GET(s, "/sms", &IndexHandler{})
+	router.GET(s, "/sms", &IndexHandler{
+		service: s,
+	})
 
-	handlerSend := &SendHandler{}
+	handlerSend := &SendHandler{
+		smsintel: s.sms,
+	}
 	router.GET(s, "/sms/send", handlerSend)
 	router.POST(s, "/sms/send", handlerSend)
 }

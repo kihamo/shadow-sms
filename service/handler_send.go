@@ -7,6 +7,8 @@ import (
 
 type SendHandler struct {
 	frontend.AbstractFrontendHandler
+
+	smsintel *smsintel.Resource
 }
 
 func (h *SendHandler) Handle() {
@@ -14,8 +16,7 @@ func (h *SendHandler) Handle() {
 		phone := h.Input.FormValue("phone")
 		message := h.Input.FormValue("message")
 
-		resourceSms, _ := h.Application.GetResource("smsintel")
-		if err := resourceSms.(*smsintel.Resource).Send(message, phone); err != nil {
+		if err := h.smsintel.Send(message, phone); err != nil {
 			h.SendJSON(map[string]interface{}{
 				"error": err.Error(),
 			})

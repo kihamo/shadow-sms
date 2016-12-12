@@ -1,6 +1,8 @@
 package smsintel
 
 import (
+	"sync"
+
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow/resource/config"
 	"github.com/kihamo/shadow/resource/logger"
@@ -11,8 +13,10 @@ import (
 type Resource struct {
 	application *shadow.Application
 	config      *config.Resource
-	client      *smsintel.SmsIntel
 	logger      logger.Logger
+
+	mutex  sync.RWMutex
+	client *smsintel.SmsIntel
 }
 
 func (r *Resource) GetName() string {
@@ -38,13 +42,21 @@ func (r *Resource) Run() error {
 		r.logger = logger.NopLogger
 	}
 
+	r.initClient()
+
 	return nil
 }
 
+func (r *Resource) initClient() {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	r.client = smsintel.NewSmsIntel(r.config.GetString(ConfigSmsLogin), r.config.GetString(ConfigSmsPassword))
+}
+
 func (r *Resource) GetClient() *smsintel.SmsIntel {
-	if r.client == nil {
-		r.client = smsintel.NewSmsIntel(r.config.GetString("sms.login"), r.config.GetString("sms.password"))
-	}
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 
 	return r.client
 }

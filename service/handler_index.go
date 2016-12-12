@@ -6,6 +6,8 @@ import (
 
 type IndexHandler struct {
 	frontend.AbstractFrontendHandler
+
+	service *SmsService
 }
 
 func (h *IndexHandler) Handle() {
@@ -13,11 +15,9 @@ func (h *IndexHandler) Handle() {
 	h.SetPageTitle("SMS")
 	h.SetPageHeader("SMS")
 
-	service := h.Service.(*SmsService)
-
-	service.mutex.RLock()
-	h.SetVar("BalanceError", service.balanceError)
-	h.SetVar("BalanceValue", service.balanceValue)
-	h.SetVar("BalancePositive", service.balanceValue > 0)
-	service.mutex.RUnlock()
+	h.service.mutex.RLock()
+	h.SetVar("BalanceError", h.service.balanceError)
+	h.SetVar("BalanceValue", h.service.balanceValue)
+	h.SetVar("BalancePositive", h.service.balanceValue > 0)
+	h.service.mutex.RUnlock()
 }
