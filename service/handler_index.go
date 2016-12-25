@@ -1,13 +1,14 @@
 package service
 
 import (
+	"github.com/kihamo/shadow-sms/resource/smsintel"
 	"github.com/kihamo/shadow/service/frontend"
 )
 
 type IndexHandler struct {
 	frontend.AbstractFrontendHandler
 
-	service *SmsService
+	smsintel *smsintel.Resource
 }
 
 func (h *IndexHandler) Handle() {
@@ -15,9 +16,9 @@ func (h *IndexHandler) Handle() {
 	h.SetPageTitle("SMS")
 	h.SetPageHeader("SMS")
 
-	h.service.mutex.RLock()
-	h.SetVar("BalanceError", h.service.balanceError)
-	h.SetVar("BalanceValue", h.service.balanceValue)
-	h.SetVar("BalancePositive", h.service.balanceValue > 0)
-	h.service.mutex.RUnlock()
+	balance, err := h.smsintel.GetBalance()
+
+	h.SetVar("BalanceError", err)
+	h.SetVar("BalanceValue", balance)
+	h.SetVar("BalancePositive", balance > 0)
 }

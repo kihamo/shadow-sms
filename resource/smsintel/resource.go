@@ -2,8 +2,10 @@ package smsintel
 
 import (
 	"sync"
+	"time"
 
 	"github.com/kihamo/shadow"
+	"github.com/kihamo/shadow/resource/alerts"
 	"github.com/kihamo/shadow/resource/config"
 	"github.com/kihamo/shadow/resource/logger"
 	"github.com/kihamo/smsintel"
@@ -12,11 +14,14 @@ import (
 
 type Resource struct {
 	application *shadow.Application
-	config      *config.Resource
-	logger      logger.Logger
 
-	mutex  sync.RWMutex
-	client *smsintel.SmsIntel
+	alerts *alerts.Resource
+	config *config.Resource
+	logger logger.Logger
+
+	mutex        sync.RWMutex
+	client       *smsintel.SmsIntel
+	changeTicker chan time.Duration
 }
 
 func (r *Resource) GetName() string {
@@ -32,26 +37,57 @@ func (r *Resource) Init(a *shadow.Application) error {
 
 	r.application = a
 
+	r.changeTicker = make(chan time.Duration)
+
 	return nil
 }
 
-func (r *Resource) Run() error {
-	if resourceLogger, err := r.application.GetResource("logger"); err == nil {
-		r.logger = resourceLogger.(*logger.Resource).Get(r.GetName())
-	} else {
-		r.logger = logger.NopLogger
+func (r *Resource) Run(wg *sync.WaitGroup) error {
+	r.logger = logger.NewOrNop(r.GetName(), r.application)
+
+	r.initClient(r.config.GetString(ConfigSmsLogin), r.config.GetString(ConfigSmsPassword))
+
+	resourceAlerts, err := r.application.GetResource("alerts")
+	if err == nil {
+		r.alerts = resourceAlerts.(*alerts.Resource)
 	}
 
-	r.initClient()
+	go func() {
+		defer wg.Done()
+
+		ticker := time.NewTicker(r.config.GetDuration(ConfigSmsMetricsInterval))
+
+		for {
+			select {
+			case <-ticker.C:
+				balance, err := r.GetBalance()
+
+				if err != nil {
+					if r.alerts != nil {
+						r.alerts.Send("Error get sms balance", err.Error(), "exclamation")
+					}
+				} else if metricBalance != nil {
+					metricBalance.Set(balance)
+				}
+
+			case d := <-r.changeTicker:
+				if d.Nanoseconds() > 0 {
+					ticker = time.NewTicker(d)
+				} else {
+					ticker.Stop()
+				}
+			}
+		}
+	}()
 
 	return nil
 }
 
-func (r *Resource) initClient() {
+func (r *Resource) initClient(login, password string) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
-	r.client = smsintel.NewSmsIntel(r.config.GetString(ConfigSmsLogin), r.config.GetString(ConfigSmsPassword))
+	r.client = smsintel.NewSmsIntel(login, password)
 }
 
 func (r *Resource) GetClient() *smsintel.SmsIntel {
@@ -98,10 +134,6 @@ func (r *Resource) GetBalance() (float64, error) {
 
 	if err != nil {
 		return -1, err
-	}
-
-	if metricBalance != nil {
-		metricBalance.Set(info.Account)
 	}
 
 	return info.Account, nil
