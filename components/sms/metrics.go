@@ -1,8 +1,8 @@
-package smsintel
+package sms
 
 import (
 	kit "github.com/go-kit/kit/metrics"
-	"github.com/kihamo/shadow/resource/metrics"
+	"github.com/kihamo/shadow/components/metrics"
 )
 
 const (
@@ -16,7 +16,7 @@ var (
 	metricTotalSendFailed  kit.Counter
 )
 
-func (r *Resource) MetricsRegister(m *metrics.Resource) {
+func (c *Component) MetricsRegister(m *metrics.Component) {
 	metricBalance = m.NewGauge(MetricSmsBalance)
 
 	metricTotalSend := m.NewCounter(MetricSmsTotalSend)
