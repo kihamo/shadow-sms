@@ -44,14 +44,14 @@ func (c *Component) GetConfigWatchers() map[string][]config.Watcher {
 	}
 }
 
-func (c *Component) watchLogin(newValue interface{}, _ interface{}) {
+func (c *Component) watchLogin(_ string, newValue interface{}, _ interface{}) {
 	c.initClient(newValue.(string), c.config.GetString(ConfigSmsPassword))
 }
 
-func (c *Component) watchPassword(newValue interface{}, _ interface{}) {
+func (c *Component) watchPassword(_ string, newValue interface{}, _ interface{}) {
 	c.initClient(c.config.GetString(ConfigSmsLogin), newValue.(string))
 }
 
-func (c *Component) watchInterval(newValue interface{}, _ interface{}) {
+func (c *Component) watchInterval(_ string, newValue interface{}, _ interface{}) {
 	c.changeTicker <- newValue.(time.Duration)
 }
