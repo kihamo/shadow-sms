@@ -12,6 +12,10 @@ import (
 	"github.com/kihamo/smsintel/procedure"
 )
 
+const (
+	ComponentName = "sms"
+)
+
 type Component struct {
 	application shadow.Application
 	alerts      *alerts.Component
@@ -24,15 +28,30 @@ type Component struct {
 }
 
 func (c *Component) GetName() string {
-	return "sms"
+	return ComponentName
 }
 
 func (c *Component) GetVersion() string {
 	return "1.0.0"
 }
 
+func (c *Component) GetDependencies() []shadow.Dependency {
+	return []shadow.Dependency{
+		{
+			Name: alerts.ComponentName,
+		},
+		{
+			Name:     config.ComponentName,
+			Required: true,
+		},
+		{
+			Name: logger.ComponentName,
+		},
+	}
+}
+
 func (c *Component) Init(a shadow.Application) error {
-	cmpConfig, err := a.GetComponent("config")
+	cmpConfig, err := a.GetComponent(config.ComponentName)
 	if err != nil {
 		return err
 	}
@@ -49,7 +68,7 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 
 	c.initClient(c.config.GetString(ConfigSmsLogin), c.config.GetString(ConfigSmsPassword))
 
-	cmpAlerts, err := c.application.GetComponent("alerts")
+	cmpAlerts, err := c.application.GetComponent(alerts.ComponentName)
 	if err == nil {
 		c.alerts = cmpAlerts.(*alerts.Component)
 	}
