@@ -14,7 +14,7 @@ type IndexHandler struct {
 
 func (h *IndexHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	balance, err := h.component.GetBalance()
-	h.Render(r.Context(), "sms", "index", map[string]interface{}{
+	h.Render(r.Context(), ComponentName, "index", map[string]interface{}{
 		"balanceError": err,
 		"balanceValue": balance,
 	})

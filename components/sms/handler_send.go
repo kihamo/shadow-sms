@@ -28,5 +28,5 @@ func (h *SendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Render(r.Context(), "sms", "send", nil)
+	h.Render(r.Context(), ComponentName, "send", nil)
 }
