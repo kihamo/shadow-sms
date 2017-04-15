@@ -1,25 +1,39 @@
 package sms
 
 import (
-	kit "github.com/go-kit/kit/metrics"
-	"github.com/kihamo/shadow/components/metrics"
+	"github.com/kihamo/snitch"
 )
 
 const (
-	MetricSmsBalance   = "sms.balance"
-	MetricSmsTotalSend = "sms.total_send"
+	MetricBalance   = ComponentName + ".balance"
+	MetricTotalSend = ComponentName + ".total_send"
 )
 
 var (
-	metricBalance          kit.Gauge
-	metricTotalSendSuccess kit.Counter
-	metricTotalSendFailed  kit.Counter
+	metricBalance          snitch.Gauge
+	metricTotalSendSuccess snitch.Counter
+	metricTotalSendFailed  snitch.Counter
 )
 
-func (c *Component) MetricsRegister(m *metrics.Component) {
-	metricBalance = m.NewGauge(MetricSmsBalance)
+type metricsCollector struct {
+}
 
-	metricTotalSend := m.NewCounter(MetricSmsTotalSend)
-	metricTotalSendSuccess = metricTotalSend.With("result", "success")
-	metricTotalSendFailed = metricTotalSend.With("result", "failed")
+func (c *metricsCollector) Describe(ch chan<- *snitch.Description) {
+	ch <- metricBalance.Description()
+	ch <- metricTotalSendSuccess.Description()
+	ch <- metricTotalSendFailed.Description()
+}
+
+func (c *metricsCollector) Collect(ch chan<- snitch.Metric) {
+	ch <- metricBalance
+	ch <- metricTotalSendSuccess
+	ch <- metricTotalSendFailed
+}
+
+func (c *Component) Metrics() snitch.Collector {
+	metricBalance = snitch.NewGauge(MetricBalance)
+	metricTotalSendSuccess = snitch.NewCounter(MetricTotalSend, "status", "success")
+	metricTotalSendFailed = snitch.NewCounter(MetricTotalSend, "status", "failed")
+
+	return &metricsCollector{}
 }

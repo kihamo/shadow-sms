@@ -62,7 +62,7 @@ func (c *Component) Init(a shadow.Application) error {
 func (c *Component) Run(wg *sync.WaitGroup) error {
 	c.logger = logger.NewOrNop(c.GetName(), c.application)
 
-	c.initClient(c.config.GetString(ConfigSmsLogin), c.config.GetString(ConfigSmsPassword))
+	c.initClient(c.config.GetString(ConfigLogin), c.config.GetString(ConfigPassword))
 
 	if cmpAlerts := c.application.GetComponent(alerts.ComponentName); cmpAlerts != nil {
 		c.alerts = cmpAlerts.(*alerts.Component)
@@ -71,7 +71,7 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 	go func() {
 		defer wg.Done()
 
-		ticker := time.NewTicker(c.config.GetDuration(ConfigSmsMetricsInterval))
+		ticker := time.NewTicker(c.config.GetDuration(ConfigBalanceUpdateInterval))
 
 		for {
 			select {
@@ -128,7 +128,7 @@ func (c *Component) Send(message, phone string) error {
 		})
 
 		if metricTotalSendSuccess != nil {
-			metricTotalSendSuccess.Add(1)
+			metricTotalSendSuccess.Inc()
 		}
 	} else {
 		c.logger.Error("Send failed", map[string]interface{}{
@@ -138,7 +138,7 @@ func (c *Component) Send(message, phone string) error {
 		})
 
 		if metricTotalSendFailed != nil {
-			metricTotalSendFailed.Add(1)
+			metricTotalSendFailed.Inc()
 		}
 	}
 
