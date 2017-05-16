@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	ConfigApiUrl                = ComponentName + ".api-url"
 	ConfigLogin                 = ComponentName + ".login"
 	ConfigPassword              = ComponentName + ".password"
 	ConfigBalanceUpdateInterval = ComponentName + ".balance-updater-interval"
@@ -14,6 +15,13 @@ const (
 
 func (c *Component) GetConfigVariables() []config.Variable {
 	return []config.Variable{
+		{
+			Key:      ConfigApiUrl,
+			Usage:    "SMSIntel Api URL",
+			Default:  "http://lcab.smsintel.ru/lcabApi",
+			Type:     config.ValueTypeString,
+			Editable: true,
+		},
 		{
 			Key:      ConfigLogin,
 			Usage:    "SMSIntel login",
@@ -38,18 +46,23 @@ func (c *Component) GetConfigVariables() []config.Variable {
 
 func (c *Component) GetConfigWatchers() map[string][]config.Watcher {
 	return map[string][]config.Watcher{
+		ConfigApiUrl:                {c.watchApiUrl},
 		ConfigLogin:                 {c.watchLogin},
 		ConfigPassword:              {c.watchPassword},
 		ConfigBalanceUpdateInterval: {c.watchBalanceUpdateInterval},
 	}
 }
 
+func (c *Component) watchApiUrl(_ string, newValue interface{}, _ interface{}) {
+	c.initClient(newValue.(string), c.config.GetString(ConfigLogin), c.config.GetString(ConfigPassword))
+}
+
 func (c *Component) watchLogin(_ string, newValue interface{}, _ interface{}) {
-	c.initClient(newValue.(string), c.config.GetString(ConfigPassword))
+	c.initClient(c.config.GetString(ConfigApiUrl), newValue.(string), c.config.GetString(ConfigPassword))
 }
 
 func (c *Component) watchPassword(_ string, newValue interface{}, _ interface{}) {
-	c.initClient(c.config.GetString(ConfigLogin), newValue.(string))
+	c.initClient(c.config.GetString(ConfigApiUrl), c.config.GetString(ConfigLogin), newValue.(string))
 }
 
 func (c *Component) watchBalanceUpdateInterval(_ string, newValue interface{}, _ interface{}) {

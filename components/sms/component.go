@@ -62,7 +62,7 @@ func (c *Component) Init(a shadow.Application) error {
 func (c *Component) Run(wg *sync.WaitGroup) error {
 	c.logger = logger.NewOrNop(c.GetName(), c.application)
 
-	c.initClient(c.config.GetString(ConfigLogin), c.config.GetString(ConfigPassword))
+	c.initClient(c.config.GetString(ConfigApiUrl), c.config.GetString(ConfigLogin), c.config.GetString(ConfigPassword))
 
 	if cmpAlerts := c.application.GetComponent(alerts.ComponentName); cmpAlerts != nil {
 		c.alerts = cmpAlerts.(*alerts.Component)
@@ -99,11 +99,14 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 	return nil
 }
 
-func (c *Component) initClient(login, password string) {
+func (c *Component) initClient(apiUrl, login, password string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	c.client = smsintel.NewSmsIntel(login, password)
+	c.client.SetOptions(map[string]string{
+		"api_url": apiUrl,
+	})
 }
 
 func (c *Component) GetClient() *smsintel.SmsIntel {
