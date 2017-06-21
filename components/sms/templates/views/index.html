@@ -18,6 +18,8 @@
         <div class="col-md-6">
             {{ if gt .balanceValue 0.0 }}
                 <span class="label label-success">{{ .balanceValue | printf "%.2f" }} <i class="fa fa-rub"></i></span>
+            {{ else if .balanceError }}
+                <span class="label label-danger">&mdash;</span>
             {{ else }}
                 <span class="label label-danger">{{ .balanceValue | printf "%.2f" }} <i class="fa fa-rub"></i></span>
             {{ end }}

@@ -1,6 +1,7 @@
 package sms
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -122,7 +123,17 @@ func (c *Component) Send(message, phone string) error {
 		To:  &phone,
 	}
 
-	_, err := c.GetClient().SendSms(input)
+	var err error
+
+	timeout := c.config.GetDuration(ConfigSendTimeout)
+	if timeout > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+
+		_, err = c.GetClient().SendSmsWithContext(ctx, input)
+	} else {
+		_, err = c.GetClient().SendSms(input)
+	}
 
 	if err == nil {
 		c.logger.Info("Send success", map[string]interface{}{
@@ -149,7 +160,20 @@ func (c *Component) Send(message, phone string) error {
 }
 
 func (c *Component) GetBalance() (float64, error) {
-	info, err := c.GetClient().Info(nil)
+	var (
+		info *procedure.InfoOutput
+		err  error
+	)
+
+	timeout := c.config.GetDuration(ConfigInfoTimeout)
+	if timeout > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+
+		info, err = c.GetClient().InfoWithContext(ctx, nil)
+	} else {
+		info, err = c.GetClient().Info(nil)
+	}
 
 	if err != nil {
 		return -1, err

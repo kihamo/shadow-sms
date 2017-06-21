@@ -11,6 +11,8 @@ const (
 	ConfigLogin                 = ComponentName + ".login"
 	ConfigPassword              = ComponentName + ".password"
 	ConfigBalanceUpdateInterval = ComponentName + ".balance-updater-interval"
+	ConfigInfoTimeout           = ComponentName + ".info.timeout"
+	ConfigSendTimeout           = ComponentName + ".send.timeout"
 )
 
 func (c *Component) GetConfigVariables() []config.Variable {
@@ -38,6 +40,20 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			Key:      ConfigBalanceUpdateInterval,
 			Usage:    "Interval for balance updater",
 			Default:  "1m",
+			Type:     config.ValueTypeDuration,
+			Editable: true,
+		},
+		{
+			Key:      ConfigInfoTimeout,
+			Usage:    "Timeout for info request",
+			Default:  "5s",
+			Type:     config.ValueTypeDuration,
+			Editable: true,
+		},
+		{
+			Key:      ConfigSendTimeout,
+			Usage:    "Timeout for send request",
+			Default:  "5s",
 			Type:     config.ValueTypeDuration,
 			Editable: true,
 		},
