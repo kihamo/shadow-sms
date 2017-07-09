@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	MetricBalance   = ComponentName + ".balance"
-	MetricTotalSend = ComponentName + ".total_send"
+	MetricBalance   = ComponentName + "_balance_rubles_total"
+	MetricTotalSend = ComponentName + "_send_total"
 )
 
 var (
@@ -31,9 +31,9 @@ func (c *metricsCollector) Collect(ch chan<- snitch.Metric) {
 }
 
 func (c *Component) Metrics() snitch.Collector {
-	metricBalance = snitch.NewGauge(MetricBalance)
-	metricTotalSendSuccess = snitch.NewCounter(MetricTotalSend, "status", "success")
-	metricTotalSendFailed = snitch.NewCounter(MetricTotalSend, "status", "failed")
+	metricBalance = snitch.NewGauge(MetricBalance, "SMS balance in rubles")
+	metricTotalSendSuccess = snitch.NewCounter(MetricTotalSend, "Number SMS sent with success status", "status", "success")
+	metricTotalSendFailed = snitch.NewCounter(MetricTotalSend, "Number SMS sent with failed status", "status", "failed")
 
 	return &metricsCollector{}
 }
