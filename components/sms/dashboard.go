@@ -21,15 +21,6 @@ func (c *Component) GetDashboardMenu() *dashboard.Menu {
 		Name: "SMS",
 		Url:  "/",
 		Icon: "files-o",
-		SubMenu: []*dashboard.Menu{{
-			Name: "Balance",
-			Url:  "/",
-			Icon: "money",
-		}, {
-			Name: "Send",
-			Url:  "/send",
-			Icon: "send",
-		}},
 	}
 }
 
@@ -41,13 +32,7 @@ func (c *Component) GetDashboardRoutes() []*dashboard.Route {
 			Handler: &IndexHandler{
 				component: c,
 			},
-		},
-		{
-			Methods: []string{http.MethodGet, http.MethodPost},
-			Path:    "/send",
-			Handler: &SendHandler{
-				component: c,
-			},
+			Auth: true,
 		},
 	}
 }

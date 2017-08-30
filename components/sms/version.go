@@ -1,5 +1,5 @@
 package sms
 
 const (
-	ComponentVersion = "1.0.29"
+	ComponentVersion = "1.0.35"
 )
