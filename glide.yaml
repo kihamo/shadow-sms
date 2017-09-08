@@ -1,0 +1,4 @@
+package: github.com/kihamo/shadow-sms
+import:
+- package: github.com/kihamo/shadow
+- package: github.com/kihamo/smsintel

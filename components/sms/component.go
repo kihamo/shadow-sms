@@ -141,8 +141,8 @@ func (c *Component) Send(message, phone string) error {
 			"text":  message,
 		})
 
-		if metricTotalSendSuccess != nil {
-			metricTotalSendSuccess.Inc()
+		if metricTotalSend != nil {
+			metricTotalSend.With("status", "success").Inc()
 		}
 	} else {
 		c.logger.Error("Send failed", map[string]interface{}{
@@ -151,8 +151,8 @@ func (c *Component) Send(message, phone string) error {
 			"error": err.Error(),
 		})
 
-		if metricTotalSendFailed != nil {
-			metricTotalSendFailed.Inc()
+		if metricTotalSend != nil {
+			metricTotalSend.With("status", "failed").Inc()
 		}
 	}
 

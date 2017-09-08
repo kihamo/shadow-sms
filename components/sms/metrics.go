@@ -10,30 +10,26 @@ const (
 )
 
 var (
-	metricBalance          snitch.Gauge
-	metricTotalSendSuccess snitch.Counter
-	metricTotalSendFailed  snitch.Counter
+	metricBalance   snitch.Gauge
+	metricTotalSend snitch.Counter
 )
 
 type metricsCollector struct {
 }
 
 func (c *metricsCollector) Describe(ch chan<- *snitch.Description) {
-	ch <- metricBalance.Description()
-	ch <- metricTotalSendSuccess.Description()
-	ch <- metricTotalSendFailed.Description()
+	metricBalance.Describe(ch)
+	metricTotalSend.Describe(ch)
 }
 
 func (c *metricsCollector) Collect(ch chan<- snitch.Metric) {
-	ch <- metricBalance
-	ch <- metricTotalSendSuccess
-	ch <- metricTotalSendFailed
+	metricBalance.Collect(ch)
+	metricTotalSend.Collect(ch)
 }
 
 func (c *Component) Metrics() snitch.Collector {
 	metricBalance = snitch.NewGauge(MetricBalance, "SMS balance in rubles")
-	metricTotalSendSuccess = snitch.NewCounter(MetricTotalSend, "Number SMS sent with success status", "status", "success")
-	metricTotalSendFailed = snitch.NewCounter(MetricTotalSend, "Number SMS sent with failed status", "status", "failed")
+	metricTotalSend = snitch.NewCounter(MetricTotalSend, "Number SMS sent")
 
 	return &metricsCollector{}
 }
