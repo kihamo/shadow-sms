@@ -1,21 +1,22 @@
-package sms
+package handlers
 
 import (
+	"github.com/kihamo/shadow-sms/components/sms"
 	"github.com/kihamo/shadow/components/dashboard"
 )
 
-type IndexHandler struct {
+type SendHandler struct {
 	dashboard.Handler
 
-	component *Component
+	Component sms.Component
 }
 
-func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+func (h *SendHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	if r.IsPost() {
 		phone := r.Original().FormValue("phone")
 		message := r.Original().FormValue("message")
 
-		if err := h.component.Send(message, phone); err != nil {
+		if err := h.Component.Send(message, phone); err != nil {
 			w.SendJSON(map[string]interface{}{
 				"error": err.Error(),
 			})
@@ -26,8 +27,8 @@ func (h *IndexHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	balance, err := h.component.GetBalance()
-	h.Render(r.Context(), ComponentName, "index", map[string]interface{}{
+	balance, err := h.Component.GetBalance()
+	h.Render(r.Context(), h.Component.GetName(), "send", map[string]interface{}{
 		"balanceError": err,
 		"balanceValue": balance,
 	})

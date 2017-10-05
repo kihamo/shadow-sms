@@ -1,12 +1,13 @@
-package sms
+package internal
 
 import (
+	"github.com/kihamo/shadow-sms/components/sms"
 	"github.com/kihamo/snitch"
 )
 
 const (
-	MetricBalance   = ComponentName + "_balance_rubles_total"
-	MetricTotalSend = ComponentName + "_send_total"
+	MetricBalance   = sms.ComponentName + "_balance_rubles_total"
+	MetricTotalSend = sms.ComponentName + "_send_total"
 )
 
 var (
