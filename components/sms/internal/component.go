@@ -7,12 +7,13 @@ import (
 
 	"github.com/kihamo/shadow"
 	"github.com/kihamo/shadow-sms/components/sms"
+	"github.com/kihamo/shadow-sms/providers"
+	"github.com/kihamo/shadow-sms/providers/smsintel"
+	"github.com/kihamo/shadow-sms/providers/terasms"
 	"github.com/kihamo/shadow/components/alerts"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
-	"github.com/kihamo/smsintel"
-	"github.com/kihamo/smsintel/procedure"
 )
 
 type Component struct {
@@ -23,7 +24,7 @@ type Component struct {
 	routes      []dashboard.Route
 
 	mutex        sync.RWMutex
-	client       *smsintel.SmsIntel
+	provider     providers.Provider
 	changeTicker chan time.Duration
 }
 
@@ -62,7 +63,7 @@ func (c *Component) Init(a shadow.Application) error {
 func (c *Component) Run(wg *sync.WaitGroup) error {
 	c.logger = logger.NewOrNop(c.GetName(), c.application)
 
-	c.initClient(c.config.GetString(sms.ConfigApiUrl), c.config.GetString(sms.ConfigLogin), c.config.GetString(sms.ConfigPassword))
+	c.initProvider()
 
 	if cmpAlerts := c.application.GetComponent(alerts.ComponentName); cmpAlerts != nil {
 		c.alerts = cmpAlerts.(alerts.Component)
@@ -99,41 +100,58 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 	return nil
 }
 
-func (c *Component) initClient(apiUrl, login, password string) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
+func (c *Component) initProvider() {
+	var (
+		p   providers.Provider
+		err error
+	)
 
-	c.client = smsintel.NewSmsIntel(login, password)
-	c.client.SetOptions(map[string]string{
-		"api_url": apiUrl,
-	})
+	id := c.config.GetString(sms.ConfigProvider)
+
+	switch id {
+	case sms.ProviderSmsIntel:
+		p, err = smsintel.NewClient(
+			c.config.GetString(sms.ConfigSmsIntelApiUrl),
+			c.config.GetString(sms.ConfigSmsIntelLogin),
+			c.config.GetString(sms.ConfigSmsIntelPassword))
+
+	case sms.ProviderTeraSms:
+		p, err = terasms.NewClient(
+			c.config.GetString(sms.ConfigTeraSmsApiUrl),
+			c.config.GetInt(sms.ConfigTeraSmsAuthType),
+			c.config.GetString(sms.ConfigTeraSmsLogin),
+			c.config.GetString(sms.ConfigTeraSmsPassword),
+			c.config.GetString(sms.ConfigTeraSmsToken),
+			c.config.GetString(sms.ConfigTeraSmsSender))
+	}
+
+	if err == nil {
+		c.mutex.Lock()
+		c.provider = p
+		c.mutex.Unlock()
+	} else {
+		c.logger.Errorf("Failed init sms provider %s with error %s", id, err.Error())
+	}
 }
 
-func (c *Component) GetClient() *smsintel.SmsIntel {
+func (c *Component) GetProvider() providers.Provider {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
-	return c.client
+	return c.provider
 }
 
 func (c *Component) Send(message, phone string) error {
-	input := &procedure.SendSmsInput{
-		Txt: message,
-		To:  &phone,
-	}
+	ctx := context.Background()
+	var ctxCancel func()
 
-	var err error
-
-	timeout := c.config.GetDuration(sms.ConfigSendTimeout)
+	timeout := c.config.GetDuration(sms.ConfigTimeoutSend)
 	if timeout > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-
-		_, err = c.GetClient().SendSmsWithContext(ctx, input)
-	} else {
-		_, err = c.GetClient().SendSms(input)
+		ctx, ctxCancel = context.WithTimeout(ctx, timeout)
 	}
+	defer ctxCancel()
 
+	err := c.GetProvider().Send(ctx, phone, message)
 	if err == nil {
 		c.logger.Info("Send success", map[string]interface{}{
 			"phone": phone,
@@ -159,24 +177,14 @@ func (c *Component) Send(message, phone string) error {
 }
 
 func (c *Component) GetBalance() (float64, error) {
-	var (
-		info *procedure.InfoOutput
-		err  error
-	)
+	ctx := context.Background()
+	var ctxCancel func()
 
-	timeout := c.config.GetDuration(sms.ConfigInfoTimeout)
+	timeout := c.config.GetDuration(sms.ConfigTimeoutBalance)
 	if timeout > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-
-		info, err = c.GetClient().InfoWithContext(ctx, nil)
-	} else {
-		info, err = c.GetClient().Info(nil)
+		ctx, ctxCancel = context.WithTimeout(ctx, timeout)
 	}
+	defer ctxCancel()
 
-	if err != nil {
-		return -1, err
-	}
-
-	return info.Account, nil
+	return c.GetProvider().Balance(ctx)
 }

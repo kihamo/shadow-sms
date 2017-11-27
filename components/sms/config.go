@@ -1,10 +1,17 @@
 package sms
 
 const (
-	ConfigApiUrl                = ComponentName + ".api-url"
-	ConfigLogin                 = ComponentName + ".login"
-	ConfigPassword              = ComponentName + ".password"
+	ConfigSmsIntelApiUrl        = ComponentName + "." + ProviderSmsIntel + ".api-url"
+	ConfigSmsIntelLogin         = ComponentName + "." + ProviderSmsIntel + ".login"
+	ConfigSmsIntelPassword      = ComponentName + "." + ProviderSmsIntel + ".password"
+	ConfigTeraSmsApiUrl         = ComponentName + "." + ProviderTeraSms + ".api-url"
+	ConfigTeraSmsAuthType       = ComponentName + "." + ProviderTeraSms + ".auth-type"
+	ConfigTeraSmsLogin          = ComponentName + "." + ProviderTeraSms + ".login"
+	ConfigTeraSmsPassword       = ComponentName + "." + ProviderTeraSms + ".password"
+	ConfigTeraSmsToken          = ComponentName + "." + ProviderTeraSms + ".token"
+	ConfigTeraSmsSender         = ComponentName + "." + ProviderTeraSms + ".sender"
+	ConfigProvider              = ComponentName + ".provider"
 	ConfigBalanceUpdateInterval = ComponentName + ".balance-updater-interval"
-	ConfigInfoTimeout           = ComponentName + ".info.timeout"
-	ConfigSendTimeout           = ComponentName + ".send.timeout"
+	ConfigTimeoutBalance        = ComponentName + ".timeouts.balance"
+	ConfigTimeoutSend           = ComponentName + ".timeouts.send"
 )
