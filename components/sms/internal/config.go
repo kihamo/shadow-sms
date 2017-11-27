@@ -47,7 +47,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"SMSIntel password",
 			true,
-			nil,
+			[]string{config.ViewPassword},
 			nil),
 		config.NewVariable(
 			sms.ConfigTeraSmsApiUrl,
@@ -86,15 +86,15 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"TeraSms password",
 			true,
-			nil,
+			[]string{config.ViewPassword},
 			nil),
 		config.NewVariable(
 			sms.ConfigTeraSmsToken,
 			config.ValueTypeString,
 			nil,
-			"TeraSms password",
+			"TeraSms token",
 			true,
-			nil,
+			[]string{config.ViewPassword},
 			nil),
 		config.NewVariable(
 			sms.ConfigTeraSmsSender,
