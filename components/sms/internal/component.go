@@ -10,7 +10,6 @@ import (
 	"github.com/kihamo/shadow-sms/providers"
 	"github.com/kihamo/shadow-sms/providers/smsintel"
 	"github.com/kihamo/shadow-sms/providers/terasms"
-	"github.com/kihamo/shadow/components/alerts"
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
@@ -18,7 +17,6 @@ import (
 
 type Component struct {
 	application shadow.Application
-	alerts      alerts.Component
 	config      config.Component
 	logger      logger.Logger
 	routes      []dashboard.Route
@@ -38,9 +36,6 @@ func (c *Component) GetVersion() string {
 
 func (c *Component) GetDependencies() []shadow.Dependency {
 	return []shadow.Dependency{
-		{
-			Name: alerts.ComponentName,
-		},
 		{
 			Name:     config.ComponentName,
 			Required: true,
@@ -65,10 +60,6 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 
 	c.initProvider()
 
-	if cmpAlerts := c.application.GetComponent(alerts.ComponentName); cmpAlerts != nil {
-		c.alerts = cmpAlerts.(alerts.Component)
-	}
-
 	go func() {
 		defer wg.Done()
 
@@ -80,9 +71,9 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 				balance, err := c.GetBalance()
 
 				if err != nil {
-					if c.alerts != nil {
-						c.alerts.Send("Error get sms balance", err.Error(), "exclamation")
-					}
+					c.logger.Error("Get SMS balance failed", map[string]interface{}{
+						"error": err.Error(),
+					})
 				} else if metricBalance != nil {
 					metricBalance.Set(balance)
 				}
