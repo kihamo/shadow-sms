@@ -16,6 +16,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			sms.ProviderSmsIntel,
 			"Sms Provider",
 			true,
+			"Others",
 			[]string{
 				config.ViewEnum,
 			},
@@ -31,6 +32,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			"http://lcab.smsintel.ru/lcabApi",
 			"SMSIntel Api URL",
 			true,
+			"SMSIntel provider",
 			nil,
 			nil),
 		config.NewVariable(
@@ -39,6 +41,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"SMSIntel login",
 			true,
+			"SMSIntel provider",
 			nil,
 			nil),
 		config.NewVariable(
@@ -47,6 +50,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"SMSIntel password",
 			true,
+			"SMSIntel provider",
 			[]string{config.ViewPassword},
 			nil),
 		config.NewVariable(
@@ -55,6 +59,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			"https://auth.terasms.ru/",
 			"TeraSms Api URL",
 			true,
+			"TeraSms provider",
 			nil,
 			nil),
 		config.NewVariable(
@@ -63,6 +68,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			terasms.AuthByToken,
 			"Sms auth type",
 			true,
+			"TeraSms provider",
 			[]string{
 				config.ViewEnum,
 			},
@@ -78,6 +84,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"TeraSms login",
 			true,
+			"TeraSms provider",
 			nil,
 			nil),
 		config.NewVariable(
@@ -86,6 +93,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"TeraSms password",
 			true,
+			"TeraSms provider",
 			[]string{config.ViewPassword},
 			nil),
 		config.NewVariable(
@@ -94,6 +102,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"TeraSms token",
 			true,
+			"TeraSms provider",
 			[]string{config.ViewPassword},
 			nil),
 		config.NewVariable(
@@ -102,6 +111,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			nil,
 			"TeraSms sender",
 			true,
+			"TeraSms provider",
 			nil,
 			nil),
 		config.NewVariable(
@@ -110,6 +120,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			"1m",
 			"Interval for balance updater",
 			true,
+			"Others",
 			nil,
 			nil),
 		config.NewVariable(
@@ -118,6 +129,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			"5s",
 			"Timeout for info request",
 			true,
+			"Others",
 			nil,
 			nil),
 		config.NewVariable(
@@ -126,6 +138,7 @@ func (c *Component) GetConfigVariables() []config.Variable {
 			"5s",
 			"Timeout for send request",
 			true,
+			"Others",
 			nil,
 			nil),
 	}
