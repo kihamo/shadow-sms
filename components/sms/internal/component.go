@@ -26,15 +26,15 @@ type Component struct {
 	changeTicker chan time.Duration
 }
 
-func (c *Component) GetName() string {
+func (c *Component) Name() string {
 	return sms.ComponentName
 }
 
-func (c *Component) GetVersion() string {
+func (c *Component) Version() string {
 	return sms.ComponentVersion
 }
 
-func (c *Component) GetDependencies() []shadow.Dependency {
+func (c *Component) Dependencies() []shadow.Dependency {
 	return []shadow.Dependency{
 		{
 			Name:     config.ComponentName,
@@ -56,14 +56,14 @@ func (c *Component) Init(a shadow.Application) error {
 }
 
 func (c *Component) Run(wg *sync.WaitGroup) error {
-	c.logger = logger.NewOrNop(c.GetName(), c.application)
+	c.logger = logger.NewOrNop(c.Name(), c.application)
 
 	c.initProvider()
 
 	go func() {
 		defer wg.Done()
 
-		ticker := time.NewTicker(c.config.GetDuration(sms.ConfigBalanceUpdateInterval))
+		ticker := time.NewTicker(c.config.Duration(sms.ConfigBalanceUpdateInterval))
 
 		for {
 			select {
@@ -97,23 +97,23 @@ func (c *Component) initProvider() {
 		err error
 	)
 
-	id := c.config.GetString(sms.ConfigProvider)
+	id := c.config.String(sms.ConfigProvider)
 
 	switch id {
 	case sms.ProviderSmsIntel:
 		p, err = smsintel.NewClient(
-			c.config.GetString(sms.ConfigSmsIntelApiUrl),
-			c.config.GetString(sms.ConfigSmsIntelLogin),
-			c.config.GetString(sms.ConfigSmsIntelPassword))
+			c.config.String(sms.ConfigSmsIntelApiUrl),
+			c.config.String(sms.ConfigSmsIntelLogin),
+			c.config.String(sms.ConfigSmsIntelPassword))
 
 	case sms.ProviderTeraSms:
 		p, err = terasms.NewClient(
-			c.config.GetString(sms.ConfigTeraSmsApiUrl),
-			c.config.GetInt(sms.ConfigTeraSmsAuthType),
-			c.config.GetString(sms.ConfigTeraSmsLogin),
-			c.config.GetString(sms.ConfigTeraSmsPassword),
-			c.config.GetString(sms.ConfigTeraSmsToken),
-			c.config.GetString(sms.ConfigTeraSmsSender))
+			c.config.String(sms.ConfigTeraSmsApiUrl),
+			c.config.Int(sms.ConfigTeraSmsAuthType),
+			c.config.String(sms.ConfigTeraSmsLogin),
+			c.config.String(sms.ConfigTeraSmsPassword),
+			c.config.String(sms.ConfigTeraSmsToken),
+			c.config.String(sms.ConfigTeraSmsSender))
 	}
 
 	if err == nil {
@@ -136,7 +136,7 @@ func (c *Component) Send(message, phone string) error {
 	ctx := context.Background()
 	var ctxCancel func()
 
-	timeout := c.config.GetDuration(sms.ConfigTimeoutSend)
+	timeout := c.config.Duration(sms.ConfigTimeoutSend)
 	if timeout > 0 {
 		ctx, ctxCancel = context.WithTimeout(ctx, timeout)
 	}
@@ -171,7 +171,7 @@ func (c *Component) GetBalance() (float64, error) {
 	ctx := context.Background()
 	var ctxCancel func()
 
-	timeout := c.config.GetDuration(sms.ConfigTimeoutBalance)
+	timeout := c.config.Duration(sms.ConfigTimeoutBalance)
 	if timeout > 0 {
 		ctx, ctxCancel = context.WithTimeout(ctx, timeout)
 	}

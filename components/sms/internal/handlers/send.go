@@ -28,7 +28,7 @@ func (h *SendHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 	}
 
 	balance, err := h.Component.GetBalance()
-	h.Render(r.Context(), h.Component.GetName(), "send", map[string]interface{}{
+	h.Render(r.Context(), h.Component.Name(), "send", map[string]interface{}{
 		"balanceError": err,
 		"balanceValue": balance,
 	})

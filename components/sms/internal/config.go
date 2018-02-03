@@ -8,7 +8,7 @@ import (
 	"github.com/kihamo/shadow/components/config"
 )
 
-func (c *Component) GetConfigVariables() []config.Variable {
+func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
 		config.NewVariable(
 			sms.ConfigProvider,
@@ -144,10 +144,10 @@ func (c *Component) GetConfigVariables() []config.Variable {
 	}
 }
 
-func (c *Component) GetConfigWatchers() []config.Watcher {
+func (c *Component) ConfigWatchers() []config.Watcher {
 	return []config.Watcher{
-		config.NewWatcher(c.GetName(), []string{sms.ConfigProvider}, c.watchProvider),
-		config.NewWatcher(c.GetName(), []string{
+		config.NewWatcher(c.Name(), []string{sms.ConfigProvider}, c.watchProvider),
+		config.NewWatcher(c.Name(), []string{
 			sms.ConfigSmsIntelApiUrl,
 			sms.ConfigSmsIntelLogin,
 			sms.ConfigSmsIntelPassword,
@@ -158,7 +158,7 @@ func (c *Component) GetConfigWatchers() []config.Watcher {
 			sms.ConfigTeraSmsToken,
 			sms.ConfigTeraSmsSender},
 			c.watchReinitProvider),
-		config.NewWatcher(c.GetName(), []string{sms.ConfigBalanceUpdateInterval}, c.watchBalanceUpdateInterval),
+		config.NewWatcher(c.Name(), []string{sms.ConfigBalanceUpdateInterval}, c.watchBalanceUpdateInterval),
 	}
 }
 
