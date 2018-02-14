@@ -11,8 +11,8 @@ const (
 )
 
 var (
-	metricBalance   snitch.Gauge
-	metricTotalSend snitch.Counter
+	metricBalance   = snitch.NewGauge(MetricBalance, "SMS balance in rubles")
+	metricTotalSend = snitch.NewCounter(MetricTotalSend, "Number SMS sent")
 )
 
 type metricsCollector struct {
@@ -29,8 +29,5 @@ func (c *metricsCollector) Collect(ch chan<- snitch.Metric) {
 }
 
 func (c *Component) Metrics() snitch.Collector {
-	metricBalance = snitch.NewGauge(MetricBalance, "SMS balance in rubles")
-	metricTotalSend = snitch.NewCounter(MetricTotalSend, "Number SMS sent")
-
 	return &metricsCollector{}
 }
