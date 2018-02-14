@@ -13,6 +13,7 @@ import (
 	"github.com/kihamo/shadow/components/config"
 	"github.com/kihamo/shadow/components/dashboard"
 	"github.com/kihamo/shadow/components/logger"
+	"github.com/kihamo/shadow/components/metrics"
 )
 
 type Component struct {
@@ -21,9 +22,10 @@ type Component struct {
 	logger      logger.Logger
 	routes      []dashboard.Route
 
-	mutex        sync.RWMutex
-	provider     providers.Provider
-	changeTicker chan time.Duration
+	mutex         sync.RWMutex
+	provider      providers.Provider
+	changeTicker  chan time.Duration
+	metricEnabled bool
 }
 
 func (c *Component) Name() string {
@@ -43,6 +45,9 @@ func (c *Component) Dependencies() []shadow.Dependency {
 		{
 			Name: logger.ComponentName,
 		},
+		{
+			Name: metrics.ComponentName,
+		},
 	}
 }
 
@@ -51,6 +56,7 @@ func (c *Component) Init(a shadow.Application) error {
 
 	c.application = a
 	c.changeTicker = make(chan time.Duration)
+	c.metricEnabled = a.HasComponent(metrics.ComponentName)
 
 	return nil
 }
@@ -74,7 +80,7 @@ func (c *Component) Run(wg *sync.WaitGroup) error {
 					c.logger.Error("Get SMS balance failed", map[string]interface{}{
 						"error": err.Error(),
 					})
-				} else if metricBalance != nil {
+				} else if c.metricEnabled {
 					metricBalance.Set(balance)
 				}
 
@@ -149,7 +155,7 @@ func (c *Component) Send(message, phone string) error {
 			"text":  message,
 		})
 
-		if metricTotalSend != nil {
+		if c.metricEnabled {
 			metricTotalSend.With("status", "success").Inc()
 		}
 	} else {
@@ -159,7 +165,7 @@ func (c *Component) Send(message, phone string) error {
 			"error": err.Error(),
 		})
 
-		if metricTotalSend != nil {
+		if c.metricEnabled {
 			metricTotalSend.With("status", "failed").Inc()
 		}
 	}
