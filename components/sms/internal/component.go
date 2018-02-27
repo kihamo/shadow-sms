@@ -150,7 +150,7 @@ func (c *Component) Send(message, phone string) error {
 
 	err := c.GetProvider().Send(ctx, phone, message)
 	if err == nil {
-		c.logger.Info("Send success", map[string]interface{}{
+		c.logger.Debug("Send success", map[string]interface{}{
 			"phone": phone,
 			"text":  message,
 		})
