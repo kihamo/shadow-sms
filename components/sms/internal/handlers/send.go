@@ -7,16 +7,16 @@ import (
 
 type SendHandler struct {
 	dashboard.Handler
-
-	Component sms.Component
 }
 
 func (h *SendHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
+	component := r.Component().(sms.Component)
+
 	if r.IsPost() {
 		phone := r.Original().FormValue("phone")
 		message := r.Original().FormValue("message")
 
-		if err := h.Component.Send(message, phone); err != nil {
+		if err := component.Send(message, phone); err != nil {
 			w.SendJSON(map[string]interface{}{
 				"error": err.Error(),
 			})
@@ -27,8 +27,8 @@ func (h *SendHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		return
 	}
 
-	balance, err := h.Component.GetBalance()
-	h.Render(r.Context(), h.Component.Name(), "send", map[string]interface{}{
+	balance, err := component.GetBalance()
+	h.Render(r.Context(), "send", map[string]interface{}{
 		"balanceError": err,
 		"balanceValue": balance,
 	})

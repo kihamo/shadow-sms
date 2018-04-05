@@ -1,0 +1,59 @@
+msgid ""
+msgstr ""
+"Report-Msgid-Bugs-To: dev@kihamo.ru\n"
+"POT-Creation-Date: 2018-03-23 23:55+0300\n"
+"Last-Translator: Kihamo Muramodo <dev@kihamo.ru>\n"
+"Language-Team: \n"
+"Language: Russian\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
+
+msgctxt "config"
+msgid "SMSIntel provider"
+msgstr "Провайдер SMSIntel"
+
+msgctxt "config"
+msgid "API URL"
+msgstr "API URL"
+
+msgctxt "config"
+msgid "Login"
+msgstr "Логин"
+
+msgctxt "config"
+msgid "Password"
+msgstr "Пароль"
+
+msgctxt "config"
+msgid "TeraSms provider"
+msgstr "Провайдер TeraSms"
+
+msgctxt "config"
+msgid "Auth type"
+msgstr "Тип авторизации"
+
+msgctxt "config"
+msgid "Token"
+msgstr "Токен"
+
+msgctxt "config"
+msgid "Sender"
+msgstr ""
+
+msgctxt "config"
+msgid "Provider"
+msgstr "Провайдер"
+
+msgctxt "config"
+msgid "Interval for balance updater"
+msgstr "Интервал обновления баланса"
+
+msgctxt "config"
+msgid "Timeout for info request"
+msgstr "Таймаут для инфо запрос"
+
+msgctxt "config"
+msgid "Timeout for send request"
+msgstr "Таймаут для запроса отправки"

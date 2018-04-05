@@ -10,144 +10,84 @@ import (
 
 func (c *Component) ConfigVariables() []config.Variable {
 	return []config.Variable{
-		config.NewVariable(
-			sms.ConfigProvider,
-			config.ValueTypeString,
-			sms.ProviderSmsIntel,
-			"Sms Provider",
-			true,
-			"Others",
-			[]string{
-				config.ViewEnum,
-			},
-			map[string]interface{}{
-				config.ViewOptionEnumOptions: [][]interface{}{
-					{sms.ProviderSmsIntel, "SMSIntel"},
-					{sms.ProviderTeraSms, "TeraSms"},
-				},
-			}),
-		config.NewVariable(
-			sms.ConfigSmsIntelApiUrl,
-			config.ValueTypeString,
-			"http://lcab.smsintel.ru/lcabApi",
-			"SMSIntel Api URL",
-			true,
-			"SMSIntel provider",
-			nil,
-			nil),
-		config.NewVariable(
-			sms.ConfigSmsIntelLogin,
-			config.ValueTypeString,
-			nil,
-			"SMSIntel login",
-			true,
-			"SMSIntel provider",
-			nil,
-			nil),
-		config.NewVariable(
-			sms.ConfigSmsIntelPassword,
-			config.ValueTypeString,
-			nil,
-			"SMSIntel password",
-			true,
-			"SMSIntel provider",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			sms.ConfigTeraSmsApiUrl,
-			config.ValueTypeString,
-			"https://auth.terasms.ru/",
-			"TeraSms Api URL",
-			true,
-			"TeraSms provider",
-			nil,
-			nil),
-		config.NewVariable(
-			sms.ConfigTeraSmsAuthType,
-			config.ValueTypeInt,
-			terasms.AuthByToken,
-			"Sms auth type",
-			true,
-			"TeraSms provider",
-			[]string{
-				config.ViewEnum,
-			},
-			map[string]interface{}{
+		config.NewVariable(sms.ConfigSmsIntelApiUrl, config.ValueTypeString).
+			WithUsage("API URL").
+			WithGroup("SMSIntel provider").
+			WithEditable(true).
+			WithDefault("http://lcab.smsintel.ru/lcabApi"),
+		config.NewVariable(sms.ConfigSmsIntelLogin, config.ValueTypeString).
+			WithUsage("Login").
+			WithGroup("SMSIntel provider").
+			WithEditable(true),
+		config.NewVariable(sms.ConfigSmsIntelPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("SMSIntel provider").
+			WithEditable(true).
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(sms.ConfigTeraSmsApiUrl, config.ValueTypeString).
+			WithUsage("API URL").
+			WithGroup("TeraSms provider").
+			WithEditable(true).
+			WithDefault("https://auth.terasms.ru/"),
+		config.NewVariable(sms.ConfigTeraSmsAuthType, config.ValueTypeInt).
+			WithUsage("Auth type").
+			WithGroup("TeraSms provider").
+			WithEditable(true).
+			WithDefault(terasms.AuthByToken).
+			WithView([]string{config.ViewEnum}).
+			WithViewOptions(map[string]interface{}{
 				config.ViewOptionEnumOptions: [][]interface{}{
 					{terasms.AuthByToken, "By token"},
 					{terasms.AuthByLoginAndPassword, "By login and password"},
 				},
 			}),
-		config.NewVariable(
-			sms.ConfigTeraSmsLogin,
-			config.ValueTypeString,
-			nil,
-			"TeraSms login",
-			true,
-			"TeraSms provider",
-			nil,
-			nil),
-		config.NewVariable(
-			sms.ConfigTeraSmsPassword,
-			config.ValueTypeString,
-			nil,
-			"TeraSms password",
-			true,
-			"TeraSms provider",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			sms.ConfigTeraSmsToken,
-			config.ValueTypeString,
-			nil,
-			"TeraSms token",
-			true,
-			"TeraSms provider",
-			[]string{config.ViewPassword},
-			nil),
-		config.NewVariable(
-			sms.ConfigTeraSmsSender,
-			config.ValueTypeString,
-			nil,
-			"TeraSms sender",
-			true,
-			"TeraSms provider",
-			nil,
-			nil),
-		config.NewVariable(
-			sms.ConfigBalanceUpdateInterval,
-			config.ValueTypeDuration,
-			"1m",
-			"Interval for balance updater",
-			true,
-			"Others",
-			nil,
-			nil),
-		config.NewVariable(
-			sms.ConfigTimeoutBalance,
-			config.ValueTypeDuration,
-			"5s",
-			"Timeout for info request",
-			true,
-			"Others",
-			nil,
-			nil),
-		config.NewVariable(
-			sms.ConfigTimeoutSend,
-			config.ValueTypeDuration,
-			"5s",
-			"Timeout for send request",
-			true,
-			"Others",
-			nil,
-			nil),
+		config.NewVariable(sms.ConfigTeraSmsLogin, config.ValueTypeString).
+			WithUsage("Login").
+			WithGroup("TeraSms provider").
+			WithEditable(true),
+		config.NewVariable(sms.ConfigTeraSmsPassword, config.ValueTypeString).
+			WithUsage("Password").
+			WithGroup("TeraSms provider").
+			WithEditable(true).
+			WithView([]string{config.ViewPassword}),
+		config.NewVariable(sms.ConfigTeraSmsToken, config.ValueTypeString).
+			WithUsage("Token").
+			WithGroup("TeraSms provider").
+			WithEditable(true),
+		config.NewVariable(sms.ConfigTeraSmsSender, config.ValueTypeString).
+			WithUsage("Sender").
+			WithGroup("TeraSms provider").
+			WithEditable(true),
+		config.NewVariable(sms.ConfigProvider, config.ValueTypeString).
+			WithUsage("Provider").
+			WithEditable(true).
+			WithDefault(sms.ProviderSmsIntel).
+			WithView([]string{config.ViewEnum}).
+			WithViewOptions(map[string]interface{}{
+				config.ViewOptionEnumOptions: [][]interface{}{
+					{sms.ProviderSmsIntel, "SMSIntel"},
+					{sms.ProviderTeraSms, "TeraSms"},
+				},
+			}),
+		config.NewVariable(sms.ConfigBalanceUpdateInterval, config.ValueTypeDuration).
+			WithUsage("Interval for balance updater").
+			WithEditable(true).
+			WithDefault("1m"),
+		config.NewVariable(sms.ConfigTimeoutBalance, config.ValueTypeDuration).
+			WithUsage("Timeout for info request").
+			WithEditable(true).
+			WithDefault("5s"),
+		config.NewVariable(sms.ConfigTimeoutSend, config.ValueTypeDuration).
+			WithUsage("Timeout for send request").
+			WithEditable(true).
+			WithDefault("5s"),
 	}
 }
 
 func (c *Component) ConfigWatchers() []config.Watcher {
 	return []config.Watcher{
-		config.NewWatcher(c.Name(), []string{sms.ConfigProvider}, c.watchProvider),
-		config.NewWatcher(c.Name(), []string{
+		config.NewWatcher([]string{sms.ConfigProvider}, c.watchProvider),
+		config.NewWatcher([]string{
 			sms.ConfigSmsIntelApiUrl,
 			sms.ConfigSmsIntelLogin,
 			sms.ConfigSmsIntelPassword,
@@ -158,7 +98,7 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 			sms.ConfigTeraSmsToken,
 			sms.ConfigTeraSmsSender},
 			c.watchReinitProvider),
-		config.NewWatcher(c.Name(), []string{sms.ConfigBalanceUpdateInterval}, c.watchBalanceUpdateInterval),
+		config.NewWatcher([]string{sms.ConfigBalanceUpdateInterval}, c.watchBalanceUpdateInterval),
 	}
 }
 
