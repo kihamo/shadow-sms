@@ -1,26 +1,26 @@
 package terasms
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
+	"encoding/json"
 	"encoding/hex"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 )
 
 const (
-	AuthByToken = iota + 1
-	AuthByLoginAndPassword
-
 	ParamSignature = "sign"
-	ParamLogin     = "login"
-	ParamPassword  = "password"
+
+	BalanceMethod = "outbox/balance/json"
+	SendSmsMethod = "outbox/send/json"
 )
 
 type client struct {
@@ -48,104 +48,142 @@ func NewClient(apiUrl string, auth int, login, password, token, sender string) (
 	}, nil
 }
 
-func (c *client) Send(ctx context.Context, phone, message string) error {
+func (c *client) Send(ctx context.Context, phone, message string) (float64, error) {
 	u := *(c.apiUrl)
-	u.Path += "outbox/send"
+	u.Path += SendSmsMethod
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-
+	body, err := c.prepareBalanceBody()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	q := req.URL.Query()
-	q.Set("target", phone)
-	q.Set("sender", c.sender)
-	q.Set("message", message)
+	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
+	if err != nil {
+		return 0, err
+	}
 
-	req.URL.RawQuery = q.Encode()
 	req.WithContext(ctx)
 
-	_, code, err := c.do(req)
+	responseBody, err := c.do(req)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	if code < 0 {
-		return fmt.Errorf("Provider returns error with code #%d", code)
+	sendResponse := &sendResponse{}
+
+	if err := json.Unmarshal(responseBody, sendResponse); err != nil {
+		return 0, err
 	}
 
-	return nil
+	if len(sendResponse.messageInfos) != 1 {
+		return 0, fmt.Errorf("No messages found in response")
+	}
+
+	return sendResponse.messageInfos[0].price, nil
 }
 
 func (c *client) Balance(ctx context.Context) (float64, error) {
 	u := *(c.apiUrl)
-	u.Path += "outbox/balance"
+	u.Path += BalanceMethod
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	body, err := c.prepareBalanceBody()
+	if err != nil {
+		return -1, err
+	}
 
+	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
 	if err != nil {
 		return -1, err
 	}
 
 	req.WithContext(ctx)
 
-	resp, code, err := c.do(req)
+	responseBody, err := c.do(req)
 	if err != nil {
 		return -1, err
 	}
 
-	if code < 0 {
-		return -1, fmt.Errorf("Provider returns error with code #%d", code)
+	balanceResponse := &balanceResponse{}
+
+	if err := json.Unmarshal(responseBody, balanceResponse); err != nil {
+		return -1, err
 	}
 
-	return strconv.ParseFloat(resp, 64)
+	if balanceResponse.status < 0 {
+		return -1, fmt.Errorf("Provider returns error with code #%d", balanceResponse.status)
+	}
+
+	return balanceResponse.balance, nil
 }
 
-func (c *client) do(r *http.Request) (string, int64, error) {
-	c.sign(r)
+func (c *client) do(r *http.Request) ([]byte, error) {
 
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
 
-	response := string(body[:])
-	code, _ := strconv.ParseInt(response, 10, 0)
-
-	return response, code, nil
+	return body, nil
 }
 
-func (c *client) sign(req *http.Request) {
-	q := req.URL.Query()
-	q.Set(ParamLogin, c.login)
+func (c *client) createSign(v reflect.Value) string {
 
-	if c.auth == AuthByLoginAndPassword {
-		q.Set(ParamPassword, c.password)
-	} else {
-		params := make([]string, 0, len(q))
-		for k, v := range q {
-			if k == ParamSignature {
-				continue
-			}
-
-			params = append(params, k+"="+v[0])
+	params := make([]string, 0, v.NumField())
+	for i := 0; i < v.NumField(); i++ {
+		if v.Type().Field(i).Name == ParamSignature {
+			continue
 		}
-
-		sort.Strings(params)
-
-		sig := md5.New()
-		io.WriteString(sig, strings.Join(params, ""))
-		io.WriteString(sig, c.token)
-
-		q.Set(ParamSignature, hex.EncodeToString(sig.Sum(nil)))
+		params = append(params, v.Type().Field(i).Name+"="+v.Field(i).String())
 	}
 
-	req.URL.RawQuery = q.Encode()
+	sort.Strings(params)
+
+	sig := md5.New()
+	io.WriteString(sig, strings.Join(params, ""))
+	io.WriteString(sig, c.token)
+
+	return hex.EncodeToString(sig.Sum(nil))
+}
+
+func (c *client) prepareSendBody(phone string, message string) ([]byte, error) {
+
+	body := &sendRequest{
+		login: c.login,
+		target: phone,
+		message: message,
+		sender: c.sender,
+	}
+
+	body.sign = c.createSign(reflect.ValueOf(body))
+
+	bodyJson, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return bodyJson, nil
+
+}
+
+func (c *client) prepareBalanceBody() ([]byte, error) {
+
+	body := &balanceRequest{
+		login: c.login,
+	}
+
+	body.sign = c.createSign(reflect.ValueOf(body))
+
+	bodyJson, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return bodyJson, nil
+
 }

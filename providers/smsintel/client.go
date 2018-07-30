@@ -20,7 +20,7 @@ func NewClient(apiUrl, login, password string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Send(ctx context.Context, phone string, message string) error {
+func (c *Client) Send(ctx context.Context, phone string, message string) (float64, error) {
 	input := &procedure.SendSmsInput{
 		Txt: message,
 		To:  &phone,
@@ -28,7 +28,7 @@ func (c *Client) Send(ctx context.Context, phone string, message string) error {
 
 	_, err := c.sdk.SendSmsWithContext(ctx, input)
 
-	return err
+	return 0, err
 }
 
 func (c *Client) Balance(ctx context.Context) (float64, error) {
