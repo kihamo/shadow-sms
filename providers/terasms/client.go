@@ -11,14 +11,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"sort"
 	"strings"
 )
 
 const (
-	ParamSignature = "sign"
-
 	BalanceMethod = "outbox/balance/json"
 	SendSmsMethod = "outbox/send/json"
 )
@@ -52,7 +49,12 @@ func (c *client) Send(ctx context.Context, phone, message string) (float64, erro
 	u := *(c.apiUrl)
 	u.Path += SendSmsMethod
 
-	body, err := c.prepareBalanceBody()
+	body, err := c.prepareBody(map[string]interface{}{
+		"login": c.login,
+		"target": phone,
+		"message": message,
+		"sender": c.sender,
+	})
 	if err != nil {
 		return 0, err
 	}
@@ -86,7 +88,9 @@ func (c *client) Balance(ctx context.Context) (float64, error) {
 	u := *(c.apiUrl)
 	u.Path += BalanceMethod
 
-	body, err := c.prepareBalanceBody()
+	body, err := c.prepareBody(map[string]interface{}{
+		"login": c.login,
+	})
 	if err != nil {
 		return -1, err
 	}
@@ -132,14 +136,23 @@ func (c *client) do(r *http.Request) ([]byte, error) {
 	return body, nil
 }
 
-func (c *client) createSign(v reflect.Value) string {
+func (c *client) prepareBody(body map[string]interface{}) ([]byte, error){
 
-	params := make([]string, 0, v.NumField())
-	for i := 0; i < v.NumField(); i++ {
-		if v.Type().Field(i).Name == ParamSignature {
-			continue
-		}
-		params = append(params, v.Type().Field(i).Name+"="+v.Field(i).String())
+	body["sign"] = c.createSign(body)
+	bodyJson, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return bodyJson, nil
+
+}
+
+func (c *client) createSign(body map[string]interface{}) string {
+
+	params := make([]string, 0, len(body))
+	for k, v := range body {
+		params = append(params, k+"="+v.(string))
 	}
 
 	sort.Strings(params)
@@ -149,41 +162,5 @@ func (c *client) createSign(v reflect.Value) string {
 	io.WriteString(sig, c.token)
 
 	return hex.EncodeToString(sig.Sum(nil))
-}
-
-func (c *client) prepareSendBody(phone string, message string) ([]byte, error) {
-
-	body := &sendRequest{
-		login: c.login,
-		target: phone,
-		message: message,
-		sender: c.sender,
-	}
-
-	body.sign = c.createSign(reflect.ValueOf(body))
-
-	bodyJson, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-
-	return bodyJson, nil
-
-}
-
-func (c *client) prepareBalanceBody() ([]byte, error) {
-
-	body := &balanceRequest{
-		login: c.login,
-	}
-
-	body.sign = c.createSign(reflect.ValueOf(body))
-
-	bodyJson, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-
-	return bodyJson, nil
 
 }
