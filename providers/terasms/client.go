@@ -56,29 +56,29 @@ func (c *client) Send(ctx context.Context, phone, message string) (float64, erro
 		"sender": c.sender,
 	})
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
 
 	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
 
 	req.WithContext(ctx)
 
 	responseBody, err := c.do(req)
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
 
 	sendResponse := &sendResponse{}
 
 	if err := json.Unmarshal(responseBody, sendResponse); err != nil {
-		return 0, err
+		return -1, err
 	}
 
 	if len(sendResponse.messageInfos) != 1 {
-		return 0, fmt.Errorf("No messages found in response")
+		return -1, fmt.Errorf("No messages found in response")
 	}
 
 	return sendResponse.messageInfos[0].price, nil
