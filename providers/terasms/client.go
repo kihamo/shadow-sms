@@ -1,8 +1,10 @@
 package terasms
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
+	"encoding/json"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -10,21 +12,15 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
-	"strconv"
 	"strings"
 )
 
 const (
-	AuthByToken = iota + 1
-	AuthByLoginAndPassword
-
-	ParamSignature = "sign"
-	ParamLogin     = "login"
-	ParamPassword  = "password"
+	BalanceMethod = "outbox/balance/json"
+	SendSmsMethod = "outbox/send/json"
 )
 
 type client struct {
-	auth     int
 	apiUrl   *url.URL
 	login    string
 	password string
@@ -32,14 +28,13 @@ type client struct {
 	sender   string
 }
 
-func NewClient(apiUrl string, auth int, login, password, token, sender string) (*client, error) {
+func NewClient(apiUrl string, login, password, token, sender string) (*client, error) {
 	u, err := url.Parse(strings.TrimRight(apiUrl, "/") + "/")
 	if err != nil {
 		return nil, err
 	}
 
 	return &client{
-		auth:     auth,
 		apiUrl:   u,
 		login:    login,
 		password: password,
@@ -48,104 +43,122 @@ func NewClient(apiUrl string, auth int, login, password, token, sender string) (
 	}, nil
 }
 
-func (c *client) Send(ctx context.Context, phone, message string) error {
+func (c *client) Send(ctx context.Context, phone, message string) (float64, error) {
 	u := *(c.apiUrl)
-	u.Path += "outbox/send"
+	u.Path += SendSmsMethod
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-
+	body, err := c.prepareBody(map[string]interface{}{
+		"login": c.login,
+		"target": phone,
+		"message": message,
+		"sender": c.sender,
+	})
 	if err != nil {
-		return err
+		return -1, err
 	}
 
-	q := req.URL.Query()
-	q.Set("target", phone)
-	q.Set("sender", c.sender)
-	q.Set("message", message)
+	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
+	if err != nil {
+		return -1, err
+	}
 
-	req.URL.RawQuery = q.Encode()
 	req.WithContext(ctx)
 
-	_, code, err := c.do(req)
+	responseBody, err := c.do(req)
 	if err != nil {
-		return err
+		return -1, err
 	}
 
-	if code < 0 {
-		return fmt.Errorf("Provider returns error with code #%d", code)
+	sendResponse := &sendResponse{}
+
+	if err := json.Unmarshal(responseBody, sendResponse); err != nil {
+		return -1, err
 	}
 
-	return nil
+	if len(sendResponse.MessageInfos) != 1 {
+		return -1, fmt.Errorf("No messages found in response")
+	}
+
+	return sendResponse.MessageInfos[0].Price, nil
 }
 
 func (c *client) Balance(ctx context.Context) (float64, error) {
 	u := *(c.apiUrl)
-	u.Path += "outbox/balance"
+	u.Path += BalanceMethod
 
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	body, err := c.prepareBody(map[string]interface{}{
+		"login": c.login,
+	})
+	if err != nil {
+		return -1, err
+	}
 
+	req, err := http.NewRequest(http.MethodPost, u.String(), bytes.NewBuffer(body))
 	if err != nil {
 		return -1, err
 	}
 
 	req.WithContext(ctx)
 
-	resp, code, err := c.do(req)
+	responseBody, err := c.do(req)
 	if err != nil {
 		return -1, err
 	}
 
-	if code < 0 {
-		return -1, fmt.Errorf("Provider returns error with code #%d", code)
+	balanceResponse := &balanceResponse{}
+
+	if err := json.Unmarshal(responseBody, balanceResponse); err != nil {
+		return -1, err
 	}
 
-	return strconv.ParseFloat(resp, 64)
+	if balanceResponse.Status < 0 {
+		return -1, fmt.Errorf("Provider returns error with code #%d", balanceResponse.Status)
+	}
+
+	return balanceResponse.Balance, nil
 }
 
-func (c *client) do(r *http.Request) (string, int64, error) {
-	c.sign(r)
+func (c *client) do(r *http.Request) ([]byte, error) {
 
 	resp, err := http.DefaultClient.Do(r)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
 
-	response := string(body[:])
-	code, _ := strconv.ParseInt(response, 10, 0)
-
-	return response, code, nil
+	return body, nil
 }
 
-func (c *client) sign(req *http.Request) {
-	q := req.URL.Query()
-	q.Set(ParamLogin, c.login)
+func (c *client) prepareBody(body map[string]interface{}) ([]byte, error){
 
-	if c.auth == AuthByLoginAndPassword {
-		q.Set(ParamPassword, c.password)
-	} else {
-		params := make([]string, 0, len(q))
-		for k, v := range q {
-			if k == ParamSignature {
-				continue
-			}
-
-			params = append(params, k+"="+v[0])
-		}
-
-		sort.Strings(params)
-
-		sig := md5.New()
-		io.WriteString(sig, strings.Join(params, ""))
-		io.WriteString(sig, c.token)
-
-		q.Set(ParamSignature, hex.EncodeToString(sig.Sum(nil)))
+	body["sign"] = c.createSign(body)
+	bodyJson, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
 	}
 
-	req.URL.RawQuery = q.Encode()
+	return bodyJson, nil
+
+}
+
+func (c *client) createSign(body map[string]interface{}) string {
+
+	params := make([]string, 0, len(body))
+	for k, v := range body {
+		params = append(params, k+"="+v.(string))
+	}
+
+	sort.Strings(params)
+
+	sig := md5.New()
+	io.WriteString(sig, strings.Join(params, ""))
+	io.WriteString(sig, c.token)
+
+	return hex.EncodeToString(sig.Sum(nil))
+
 }

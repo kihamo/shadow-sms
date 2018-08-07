@@ -16,7 +16,7 @@ func (h *SendHandler) ServeHTTP(w *dashboard.Response, r *dashboard.Request) {
 		phone := r.Original().FormValue("phone")
 		message := r.Original().FormValue("message")
 
-		if err := component.Send(message, phone); err != nil {
+		if _, err := component.Send(message, phone); err != nil {
 			w.SendJSON(map[string]interface{}{
 				"error": err.Error(),
 			})

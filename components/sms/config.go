@@ -5,7 +5,6 @@ const (
 	ConfigSmsIntelLogin         = ComponentName + "." + ProviderSmsIntel + ".login"
 	ConfigSmsIntelPassword      = ComponentName + "." + ProviderSmsIntel + ".password"
 	ConfigTeraSmsApiUrl         = ComponentName + "." + ProviderTeraSms + ".api-url"
-	ConfigTeraSmsAuthType       = ComponentName + "." + ProviderTeraSms + ".auth-type"
 	ConfigTeraSmsLogin          = ComponentName + "." + ProviderTeraSms + ".login"
 	ConfigTeraSmsPassword       = ComponentName + "." + ProviderTeraSms + ".password"
 	ConfigTeraSmsToken          = ComponentName + "." + ProviderTeraSms + ".token"
