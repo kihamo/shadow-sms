@@ -28,7 +28,7 @@ func (c *Client) Send(ctx context.Context, phone string, message string) (float6
 
 	_, err := c.sdk.SendSmsWithContext(ctx, input)
 
-	return 0, err
+	return -1, err
 }
 
 func (c *Client) Balance(ctx context.Context) (float64, error) {
