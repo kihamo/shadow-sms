@@ -1,20 +1,20 @@
 package terasms
 
 type messageInfo struct {
-	id     string  `json:"id"`
-	msisdn string  `json:"msisdn"`
-	status int     `json:"status"`
-	price  float64 `json:"price"`
+	Id     string  `json:"id"`
+	Msisdn string  `json:"msisdn"`
+	Status int     `json:"status"`
+	Price  float64 `json:"price"`
 }
 
 type sendResponse struct {
-	status            int32          `json:"status"`
-	statusDescription string         `json:"status_description"`
-	messageInfos      []*messageInfo `json:"message_infos"`
+	Status            int32          `json:"status"`
+	StatusDescription string         `json:"status_description"`
+	MessageInfos      []*messageInfo `json:"message_infos"`
 }
 
 type balanceResponse struct {
-	status            int32   `json:"status"`
-	statusDescription string  `json:"status_description"`
-	balance           float64 `json:"balance"`
+	Status            int32   `json:"status"`
+	StatusDescription string  `json:"status_description"`
+	Balance           float64 `json:"balance"`
 }

@@ -21,7 +21,6 @@ const (
 )
 
 type client struct {
-	auth     int
 	apiUrl   *url.URL
 	login    string
 	password string
@@ -29,14 +28,13 @@ type client struct {
 	sender   string
 }
 
-func NewClient(apiUrl string, auth int, login, password, token, sender string) (*client, error) {
+func NewClient(apiUrl string, login, password, token, sender string) (*client, error) {
 	u, err := url.Parse(strings.TrimRight(apiUrl, "/") + "/")
 	if err != nil {
 		return nil, err
 	}
 
 	return &client{
-		auth:     auth,
 		apiUrl:   u,
 		login:    login,
 		password: password,
@@ -77,11 +75,11 @@ func (c *client) Send(ctx context.Context, phone, message string) (float64, erro
 		return -1, err
 	}
 
-	if len(sendResponse.messageInfos) != 1 {
+	if len(sendResponse.MessageInfos) != 1 {
 		return -1, fmt.Errorf("No messages found in response")
 	}
 
-	return sendResponse.messageInfos[0].price, nil
+	return sendResponse.MessageInfos[0].Price, nil
 }
 
 func (c *client) Balance(ctx context.Context) (float64, error) {
@@ -113,11 +111,11 @@ func (c *client) Balance(ctx context.Context) (float64, error) {
 		return -1, err
 	}
 
-	if balanceResponse.status < 0 {
-		return -1, fmt.Errorf("Provider returns error with code #%d", balanceResponse.status)
+	if balanceResponse.Status < 0 {
+		return -1, fmt.Errorf("Provider returns error with code #%d", balanceResponse.Status)
 	}
 
-	return balanceResponse.balance, nil
+	return balanceResponse.Balance, nil
 }
 
 func (c *client) do(r *http.Request) ([]byte, error) {

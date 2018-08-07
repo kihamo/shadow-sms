@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/kihamo/shadow-sms/components/sms"
-	"github.com/kihamo/shadow-sms/providers/terasms"
 	"github.com/kihamo/shadow/components/config"
 )
 
@@ -29,18 +28,6 @@ func (c *Component) ConfigVariables() []config.Variable {
 			WithGroup("TeraSms provider").
 			WithEditable(true).
 			WithDefault("https://auth.terasms.ru/"),
-		config.NewVariable(sms.ConfigTeraSmsAuthType, config.ValueTypeInt).
-			WithUsage("Auth type").
-			WithGroup("TeraSms provider").
-			WithEditable(true).
-			WithDefault(terasms.AuthByToken).
-			WithView([]string{config.ViewEnum}).
-			WithViewOptions(map[string]interface{}{
-				config.ViewOptionEnumOptions: [][]interface{}{
-					{terasms.AuthByToken, "By token"},
-					{terasms.AuthByLoginAndPassword, "By login and password"},
-				},
-			}),
 		config.NewVariable(sms.ConfigTeraSmsLogin, config.ValueTypeString).
 			WithUsage("Login").
 			WithGroup("TeraSms provider").
@@ -92,7 +79,6 @@ func (c *Component) ConfigWatchers() []config.Watcher {
 			sms.ConfigSmsIntelLogin,
 			sms.ConfigSmsIntelPassword,
 			sms.ConfigTeraSmsApiUrl,
-			sms.ConfigTeraSmsAuthType,
 			sms.ConfigTeraSmsLogin,
 			sms.ConfigTeraSmsPassword,
 			sms.ConfigTeraSmsToken,

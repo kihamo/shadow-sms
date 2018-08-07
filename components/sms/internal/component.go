@@ -119,7 +119,6 @@ func (c *Component) initProvider() {
 	case sms.ProviderTeraSms:
 		p, err = terasms.NewClient(
 			c.config.String(sms.ConfigTeraSmsApiUrl),
-			c.config.Int(sms.ConfigTeraSmsAuthType),
 			c.config.String(sms.ConfigTeraSmsLogin),
 			c.config.String(sms.ConfigTeraSmsPassword),
 			c.config.String(sms.ConfigTeraSmsToken),
@@ -142,7 +141,7 @@ func (c *Component) GetProvider() providers.Provider {
 	return c.provider
 }
 
-func (c *Component) Send(message, phone string) error {
+func (c *Component) Send(message, phone string) (float64, error) {
 	ctx := context.Background()
 	var ctxCancel func()
 
@@ -152,7 +151,7 @@ func (c *Component) Send(message, phone string) error {
 	}
 	defer ctxCancel()
 
-	err := c.GetProvider().Send(ctx, phone, message)
+	price, err := c.GetProvider().Send(ctx, phone, message)
 	if err == nil {
 		c.logger.Debug("Send success", map[string]interface{}{
 			"phone": phone,
@@ -174,7 +173,7 @@ func (c *Component) Send(message, phone string) error {
 		}
 	}
 
-	return err
+	return price, err
 }
 
 func (c *Component) GetBalance() (float64, error) {
